@@ -1,2 +1,6 @@
+**/__pycache__
 build
-
+frontend/.*
+frontend/dist
+frontend/node_modules
+venv

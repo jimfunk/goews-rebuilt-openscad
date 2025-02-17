@@ -36,7 +36,7 @@ module hanger(variant=variant_original, hanger_tolerance) {
 
         // Rear tile cutoff (only on thicker cleats)
         if (variant == variant_thicker_cleats) {
-            rear_cutoff = hanger_thickness + hanger_offset - tile_thickness;
+            rear_cutoff = hanger_total_thickness - tile_thickness;
             linear_extrude(height = hanger_height)
                 square([hanger_width, rear_cutoff]);
         }

@@ -1,0 +1,15 @@
+[Unit]
+Description=GOEWS part generator
+Documentation=https://github.com/jimfunk/goews-rebuilt-openscad
+After=network.target
+
+[Service]
+User=goews
+Group=users
+WorkingDirectory=/srv/goews-rebuilt-openscad
+ExecStart=/srv/goews-rebuilt-openscad/venv/bin/sanic server.server
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
