@@ -26,6 +26,10 @@ thicker cleats held at 40lb and failed at 45lb.
 Hooks are similar to the original ones. The shank and post dimensions are
 configurable.
 
+### Bolts
+
+Bolts are similar to the original ones. The length and socket width are configurable.
+
 ## Part generator
 
 A part generator is included that provides a web interface to generate the supported
@@ -55,11 +59,9 @@ actually writable by the `goews` user.
 
 PRs are welcome :-)
 
-* Bolts
 * Shelves
 * Boxes
 * Cups
-* Hangers
 * Gridfinity plates
 * Tile edge fillers
 * Grid tiles

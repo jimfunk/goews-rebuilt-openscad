@@ -111,6 +111,19 @@ tile_mounting_hole_countersink_depth = 2;
 // Mounting hole countersink inset depth
 tile_mounting_hole_countersink_inset_depth = 1;
 
+// Bolt head outer diameter
+bolt_head_outer_diameter = 19.35;
+
+// Bolt head thickness
+bolt_head_thickness = 4;
+
+// Bolt head cutout radius for the outer profile
+bolt_head_cutout_radius = 7.5;
+
+// Bolt head cutout offset from center for the outer profile
+bolt_head_cutout_offset = 14.175;
+
+
 // Variant definitions
 variant_original = 0;
 variant_thicker_cleats = 1;

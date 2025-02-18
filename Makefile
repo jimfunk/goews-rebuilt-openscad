@@ -58,7 +58,11 @@ PART_HOOK = 1
 HOOK_SIZES= 10x10 10x20 10x30 10x40 10x50 10x60 20x10 20x20 20x30 20x40 20x50 20x60 20x70 20x80
 HOOKS = $(foreach size,$(HOOK_SIZES),$(foreach variant,$(VARIANTS),$(BUILD_DIR)/hook-$(variant)-$(size).stl))
 
-all: tiles hooks server
+PART_BOLT = 1
+BOLT_LENGTHS= 9 16
+BOLTS = $(foreach length,$(BOLT_LENGTHS),$(BUILD_DIR)/bolt-$(length).stl)
+
+all: tiles hooks bolts
 .PHONY: all
 
 # Generate all tile models
@@ -68,6 +72,10 @@ tiles: $(TILES)
 # Generate all hook models
 hooks: $(HOOKS)
 .PHONY: hooks
+
+# Generate all bolt models
+bolts: $(BOLTS)
+.PHONY: bolts
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
@@ -99,6 +107,14 @@ $(BUILD_DIR)/hook-%.stl: $(MAIN_SCAD) $(BUILD_DIR)
 		-D 'variant=$(VARIANT_NUM)' \
 		-D 'hook_width=$(HOOK_WIDTH)' \
 		-D 'hook_shank_length=$(HOOK_SHANK_LENGTH)'
+
+# bolt rule
+$(BUILD_DIR)/bolt-%.stl: $(MAIN_SCAD) $(BUILD_DIR)
+	$(eval LENGTH := $(word 1,$(subst -, ,$*)))
+	$(OPENSCAD) $(OPENSCAD_ARGS) \
+		-o $@ $(MAIN_SCAD) \
+		-D 'part=$(PART_BOLT)' \
+		-D 'bolt_length=$(LENGTH)'
 
 $(VIRTUALENV): server/requirements.txt
 	$(PYTHON) -m venv $(VIRTUALENV_DIR)

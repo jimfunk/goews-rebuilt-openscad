@@ -28,6 +28,7 @@ async def main(request):
 # Get the API calls loaded
 import server.tile
 import server.hook
+import server.bolt
 
 
 if __name__ == "__main__":

@@ -2,6 +2,7 @@ include <BOSL2/std.scad>
 include <BOSL2/threading.scad>
 
 include <constants.scad>
+use <bolt.scad>
 use <hanger.scad>
 use <hook.scad>
 use <parsers.scad>
@@ -9,7 +10,7 @@ use <tile.scad>
 
 /* [Primary parameters] */
 // Which part to build
-part = 0; // [0: Tile, 1: Hook]
+part = 0; // [0: Tile, 1: Hook, 2: Bolt]
 
 // Which variant to use
 variant = 0; // [0: Original, 1: Thicker cleats]
@@ -46,6 +47,13 @@ hook_post_thickness = 6;
 // Hook rounding on the outer corners in mm
 hook_rounding = 0.5;
 
+/* [Bolt parameters] */
+// Bolt length in mm
+bolt_length = 9;
+
+// Bolt socket width in mm
+bolt_socket_width = 8.4;
+
 /* [Hidden] */
 $fa=0.5;
 $fs=0.5;
@@ -69,4 +77,9 @@ else if (part == 1)
         post_thickness=hook_post_thickness,
         hanger_tolerance=hanger_tolerance,
         rounding=hook_rounding
+    );
+else if (part == 2)
+    bolt(
+        length=bolt_length,
+        socket_width=bolt_socket_width
     );

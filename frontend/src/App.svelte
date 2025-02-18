@@ -54,7 +54,7 @@
                 variantParameter,
             ],
         },
-        hanger: {
+        hook: {
             name: "Hook",
             URL: "/api/hook",
             parameters: [
@@ -101,6 +101,26 @@
                     description: "Rounding of the hook outer corners in mm",
                 },
                 variantParameter,
+            ],
+        },
+        bolt: {
+            name: "Bolt",
+            URL: "/api/bolt",
+            parameters: [
+                {
+                    field: "length",
+                    name: "Length",
+                    type: "number",
+                    default: 9.0,
+                    description: "Length of the threaded part of the bolt in mm",
+                },
+                {
+                    field: "socket_width",
+                    name: "Socket width",
+                    type: "number",
+                    default: 8.4,
+                    description: "Width of the socket in mm",
+                },
             ],
         },
     };
