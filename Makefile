@@ -58,7 +58,7 @@ PART_HOOK = 1
 HOOK_SIZES= 10x10 10x20 10x30 10x40 10x50 10x60 20x10 20x20 20x30 20x40 20x50 20x60 20x70 20x80
 HOOKS = $(foreach size,$(HOOK_SIZES),$(foreach variant,$(VARIANTS),$(BUILD_DIR)/hook-$(variant)-$(size).stl))
 
-PART_BOLT = 1
+PART_BOLT = 2
 BOLT_LENGTHS= 9 16
 BOLTS = $(foreach length,$(BOLT_LENGTHS),$(BUILD_DIR)/bolt-$(length).stl)
 

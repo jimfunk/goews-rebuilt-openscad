@@ -49,8 +49,8 @@ module hanger(variant=variant_original, hanger_tolerance) {
     }
 }
 
-// The plate with a hanger attached to the back
-module hanger_plate(variant=variant_original, hanger_tolerance) {
+// The plate with a hanger attached to the back but without the outer rounding
+module hanger_plate_unit(variant=variant_original, hanger_tolerance=0.15) {
     hanger_plate_offset = get_hanger_plate_offset(variant, hanger_tolerance);
     hanger_total_thickness = hanger_thickness + hanger_plate_offset;
 
@@ -63,13 +63,7 @@ module hanger_plate(variant=variant_original, hanger_tolerance) {
         rotate([90, 0, 180])
             linear_extrude(height=plate_thickness)
                 difference() {
-                    hull() {
-                        square([plate_width, plate_height - plate_outer_radius]);
-                        translate([plate_outer_radius, plate_height - plate_outer_radius, 0])
-                            circle(3);
-                        translate([plate_width - plate_outer_radius, plate_height - plate_outer_radius, 0])
-                            circle(3);
-                    }
+                    square([plate_width, plate_height]);
                     union() {
                         translate([plate_width / 2, plate_cutout_y_offset])
                             circle(plate_cutout_radius);
@@ -86,4 +80,36 @@ module hanger_plate(variant=variant_original, hanger_tolerance) {
                                 );
                     }
                 }
+}
+
+
+// The plate with a hanger attached to the back
+module hanger_plate(variant=variant_original, hanger_units=1, hanger_tolerance=0.15) {
+    hanger_plate_offset = get_hanger_plate_offset(variant, hanger_tolerance);
+    hanger_total_thickness = hanger_thickness + hanger_plate_offset;
+    total_plate_width = (hanger_units * plate_width) + ((hanger_units - 1) * plate_gap) ;
+
+    difference() {
+        // Main hanger plates
+        union() {
+            for (i = [0:hanger_units - 1]) {
+                // Plate with hanger
+                translate([(plate_width + plate_gap) * i, 0, 0])
+                    hanger_plate_unit(variant=variant, hanger_tolerance=hanger_tolerance);
+                // Fill the gaps if we have multiple hangers
+                if (i > 0 && i < hanger_units) {
+                    translate([((plate_width + plate_gap) * (i - 1)) + plate_width, hanger_total_thickness, 0])
+                        cube([plate_gap, plate_thickness, plate_height]);
+                }
+            }
+        }
+
+        // Outer roundovers
+        translate([0, hanger_total_thickness + plate_thickness, plate_height])
+            rotate([90, 90, 0])
+                rounding_edge_mask(l=plate_thickness, r=plate_outer_radius, anchor=BOTTOM);
+        translate([total_plate_width, hanger_total_thickness + plate_thickness, plate_height])
+            rotate([90, 180, 0])
+                rounding_edge_mask(l=plate_thickness, r=plate_outer_radius, anchor=BOTTOM);
+    }
 }

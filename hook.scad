@@ -18,11 +18,15 @@ module hook(
     hanger_total_thickness = hanger_thickness + hanger_plate_offset;
     plate_total_thickness = plate_thickness + hanger_total_thickness;
 
-    x_offset = (plate_width - width) / 2;
+    x_offset = (get_hanger_plate_width(width) - width) / 2;
     y_offset = plate_total_thickness;
 
     union() {
-        hanger_plate(variant=variant, hanger_tolerance);
+        hanger_plate(
+            variant=variant,
+            hanger_units=get_hanger_units_from_width(width),
+            hanger_tolerance=hanger_tolerance
+        );
 
         translate([x_offset, y_offset, 0])
             cuboid(

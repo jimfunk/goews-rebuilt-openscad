@@ -49,7 +49,8 @@
                     name: "Skip list",
                     type: "skip_list",
                     default: [],
-                    description: "List of tiles to exclude as row and column numbers starting at the lower left",
+                    description:
+                        "List of tiles to exclude as row and column numbers starting at the lower left",
                 },
                 variantParameter,
             ],
@@ -112,7 +113,8 @@
                     name: "Length",
                     type: "number",
                     default: 9.0,
-                    description: "Length of the threaded part of the bolt in mm",
+                    description:
+                        "Length of the threaded part of the bolt in mm",
                 },
                 {
                     field: "socket_width",
@@ -245,7 +247,7 @@
 </script>
 
 <svelte:head>
-    <title>GOEWS Tile Generator</title>
+    <title>GOEWS Part Generator</title>
 </svelte:head>
 
 <main class="bg-gray-100">

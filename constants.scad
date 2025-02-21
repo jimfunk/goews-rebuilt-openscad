@@ -24,6 +24,9 @@ hanger_offset = 1;
 // Plate width
 plate_width = 41.5;
 
+// The distance added between plate hangers when there are multiple
+plate_gap = 0.5;
+
 // Plate thickness
 plate_thickness = 3;
 
@@ -133,3 +136,9 @@ variant_thicker_cleats = 1;
 // thicker cleat variant
 function get_hanger_plate_offset(variant, hanger_tolerance) =
     variant == variant_thicker_cleats ? hanger_offset + hanger_tolerance : hanger_tolerance;
+
+// Get the number of hanger units needed for the given width
+function get_hanger_units_from_width(width) = ceil(width / plate_width);
+
+// Get the total hanger plate width for the given width
+function get_hanger_plate_width(width) = ceil(width / plate_width) * plate_width;
