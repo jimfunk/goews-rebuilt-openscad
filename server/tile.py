@@ -38,7 +38,7 @@ class TileDefinition(BaseModel):
 async def tile(request: Request, body: TileDefinition):
     skip_list = ",".join(repr(entry) for entry in body.skip_list)
     return response.raw(
-        build(
+        await build(
             part=Part.Tile,
             variant=body.variant,
             tile_columns=body.columns,

@@ -1,7 +1,7 @@
-from functools import lru_cache
+import asyncio
+from async_lru import alru_cache
 import logging
 from pathlib import Path
-import subprocess
 
 
 logger = logging.getLogger("openscad")
@@ -10,12 +10,16 @@ logger = logging.getLogger("openscad")
 top_dir = (Path(__file__) / "../..").resolve()
 model_file = top_dir / "GOEWS.scad"
 
+
 class OpenSCADError(Exception):
     pass
 
 
-@lru_cache(maxsize=1024)
-def build(**params) -> bytes:
+# Allow up to 32 processes at once
+process_semaphore = asyncio.Semaphore(32)
+
+@alru_cache(maxsize=1024)
+async def build(**params) -> bytes:
     if not params:
         raise OpenSCADError("No parameters given")
 
@@ -30,16 +34,28 @@ def build(**params) -> bytes:
         "stl",
     ]
     for name, value in params.items():
-        if value:
+        if value is not None:
             if isinstance(value, str):
-                cmd += ["-D", f"{name}=\"{value}\""]
+                cmd += ["-D", f'{name}="{value}"']
             else:
                 cmd += ["-D", f"{name}={value}"]
 
-    try:
-        result = subprocess.run(cmd, capture_output=True, check=True)
-    except subprocess.CalledProcessError as e:
-        logger.error(f"OpenSCAD build failed: {e.stderr.decode()}")
+    async with process_semaphore:
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+            )
+            stdout, stderr = await proc.communicate()
+        except asyncio.CancelledError:
+            proc.kill()
+            raise
+        except Exception:
+            proc.kill()
+            logger.exception("Got exception running openscad")
+            raise OpenSCADError("Model generation failed")
+
+    if proc.returncode != 0:
+        logger.error(f"OpenSCAD build failed: {stderr.decode()}")
         raise OpenSCADError("Model generation failed")
 
-    return result.stdout
+    return stdout

@@ -1,8 +1,8 @@
-from dataclasses import dataclass
+from pydantic import BaseModel, Field
 from sanic import Sanic, response
-from sanic.exceptions import BadRequest
 from sanic.request import Request
-from sanic_ext import openapi
+from sanic_ext import openapi, validate
+from typing import Annotated
 
 from server.openscad import build
 from server.enums import Part, Variant
@@ -11,11 +11,12 @@ from server.enums import Part, Variant
 app = Sanic.get_app()
 
 
-@dataclass
-class HookDefinition:
-    width: float
-    shank_length: float
-    shank_thickness: float
+class HookDefinition(BaseModel):
+    hooks: Annotated[int, Field(gt=0)]
+    width: Annotated[float, Field(gt=0)]
+    gap: Annotated[float, Field(gt=0)]
+    shank_length: Annotated[float, Field(gt=0)]
+    shank_thickness: Annotated[float, Field(gt=0)]
     post_height: float
     post_thickness: float
     rounding: float
@@ -23,33 +24,23 @@ class HookDefinition:
 
 
 @app.post("/api/hook")
+@validate(json=HookDefinition)
 @openapi.body(HookDefinition, required=True)
 @openapi.response(200, {"model/stl": bytes})
 @openapi.description("Create a GOEWS hook")
-async def hook(request: Request):
-    params = request.json
-
-    width = params.get("width", 1)
-    shank_length = params.get("shank_length", 1)
-    shank_thickness = params.get("shank_thickness", 1)
-    post_height = params.get("post_height", 1)
-    post_thickness = params.get("post_thickness", 1)
-    rounding = params.get("rounding", 1)
-    try:
-        variant = Variant(params.get("variant", 0))
-    except ValueError:
-        raise BadRequest("Invalid variant")
-
+async def hook(request: Request, body: HookDefinition):
     return response.raw(
-        build(
+        await build(
             part=Part.Hook,
-            variant=variant,
-            hook_width=width,
-            hook_shank_length=shank_length,
-            hook_shank_thickness=shank_thickness,
-            hook_post_height=post_height,
-            hook_post_thickness=post_thickness,
-            hook_rounding=rounding,
+            variant=body.variant,
+            hooks=body.hooks,
+            hook_width=body.width,
+            hook_gap=body.gap,
+            hook_shank_length=body.shank_length,
+            hook_shank_thickness=body.shank_thickness,
+            hook_post_height=body.post_height,
+            hook_post_thickness=body.post_thickness,
+            hook_rounding=body.rounding,
         ),
         content_type="model/stl",
     )

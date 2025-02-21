@@ -60,11 +60,25 @@
             URL: "/api/hook",
             parameters: [
                 {
+                    field: "hooks",
+                    name: "Hooks",
+                    type: "number",
+                    default: 1,
+                    description: "Number of hooks",
+                },
+                {
                     field: "width",
                     name: "Width",
                     type: "number",
                     default: 10.0,
                     description: "Width of the hook in mm",
+                },
+                {
+                    field: "gap",
+                    name: "Gap",
+                    type: "number",
+                    default: 10.0,
+                    description: "Gap between hooks when there is more than one",
                 },
                 {
                     field: "shank_length",
@@ -85,14 +99,14 @@
                     name: "Post height",
                     type: "number",
                     default: 18.0,
-                    description: "Height of the post in mm",
+                    description: "Height of the post in mm. If 0 the post will be omitted",
                 },
                 {
                     field: "post_thickness",
                     name: "Post thickness",
                     type: "number",
                     default: 6.0,
-                    description: "Thickness of the post in mm",
+                    description: "Thickness of the post in mm. If 0 the post will be omitted",
                 },
                 {
                     field: "rounding",

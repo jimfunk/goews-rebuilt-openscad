@@ -1,11 +1,11 @@
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 from sanic import Sanic, response
 from sanic.request import Request
 from sanic_ext import openapi, validate
 from typing import Annotated
 
 from server.openscad import build
-from server.enums import Part, Variant
+from server.enums import Part
 
 
 app = Sanic.get_app()
@@ -23,7 +23,7 @@ class BoltDefinition(BaseModel):
 @openapi.description("Create a standard GOEWS bolt")
 async def bolt(request: Request, body: BoltDefinition):
     return response.raw(
-        build(
+        await build(
             part=Part.Bolt,
             bolt_length=body.length,
             bolt_socket_width=body.socket_width,

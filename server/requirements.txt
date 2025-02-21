@@ -1,3 +1,4 @@
+async-lru~=2.0
 pydantic~=2.10
 sanic~=24.12
 sanic-ext~=23.12

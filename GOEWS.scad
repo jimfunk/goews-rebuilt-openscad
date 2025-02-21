@@ -29,8 +29,14 @@ tile_rows = 4;
 tile_skip_list = "";
 
 /* [Hook parameters] */
+// Number of hooks
+hooks = 1;
+
 // Hook width in mm
 hook_width = 10;
+
+// Gap between hooks when there is more than one
+hook_gap = 10;
 
 // Hook shank length in mm
 hook_shank_length = 10;
@@ -69,8 +75,10 @@ if (part == 0)
     );
 else if (part == 1)
     hook(
+        hooks=hooks,
         variant=variant,
         width=hook_width,
+        gap=hook_gap,
         shank_length=hook_shank_length,
         shank_thickness=hook_shank_thickness,
         post_height=hook_post_height,
