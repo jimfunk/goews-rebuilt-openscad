@@ -6,11 +6,12 @@ use <bolt.scad>
 use <hanger.scad>
 use <hook.scad>
 use <parsers.scad>
+use <rack.scad>
 use <tile.scad>
 
 /* [Primary parameters] */
 // Which part to build
-part = 0; // [0: Tile, 1: Hook, 2: Bolt]
+part = 0; // [0: Tile, 1: Hook, 2: Bolt, 3: Rack]
 
 // Which variant to use
 variant = 0; // [0: Original, 1: Thicker cleats]
@@ -53,6 +54,34 @@ hook_post_thickness = 6;
 // Hook rounding on the outer corners in mm
 hook_rounding = 0.5;
 
+/* [Rack parameters] */
+// Number of slots in the rack
+rack_slots = 7;
+
+// Slot width in mm
+rack_slot_width = 6;
+
+// Divider width in mm
+rack_divider_width = 10;
+
+// Divider length in mm
+rack_divider_length = 80;
+
+// Divider thickness in mm
+rack_divider_thickness = 6;
+
+// Whether to include a lip at the front of the dividers
+rack_lip = false;
+
+// Lip height in mm
+rack_lip_height = 8;
+
+// Lip thickness in mm
+rack_lip_thickness = 4;
+
+// Rounding on the outer corners of the divider and lip in mm
+rack_rounding = 0.5;
+
 /* [Bolt parameters] */
 // Bolt length in mm
 bolt_length = 9;
@@ -90,4 +119,18 @@ else if (part == 2)
     bolt(
         length=bolt_length,
         socket_width=bolt_socket_width
+    );
+else if (part == 3)
+    rack(
+        slots=rack_slots,
+        slot_width=rack_slot_width,
+        divider_width=rack_divider_width,
+        divider_length=rack_divider_length,
+        divider_thickness=rack_divider_thickness,
+        lip=rack_lip,
+        lip_height=rack_lip_height,
+        lip_thickness=rack_lip_thickness,
+        rounding=rack_rounding,
+        hanger_tolerance=hanger_tolerance,
+        variant=variant
     );

@@ -2,6 +2,10 @@
     import { Canvas } from "@threlte/core";
     import { onMount } from "svelte";
     import STLViewer from "./STLViewer.svelte";
+    import BooleanParameter from "./parameters/BooleanParameter.svelte";
+    import NumberParameter from "./parameters/NumberParameter.svelte";
+    import SelectParameter from "./parameters/SelectParameter.svelte";
+    import SkipListParameter from "./parameters/SkipListParameter.svelte";
 
     let selectedPartType = "tile";
     let parameters = {};
@@ -78,7 +82,8 @@
                     name: "Gap",
                     type: "number",
                     default: 10.0,
-                    description: "Gap between hooks when there is more than one",
+                    description:
+                        "Gap between hooks when there is more than one",
                 },
                 {
                     field: "shank_length",
@@ -99,14 +104,87 @@
                     name: "Post height",
                     type: "number",
                     default: 18.0,
-                    description: "Height of the post in mm. If 0 the post will be omitted",
+                    description:
+                        "Height of the post in mm. If 0 the post will be omitted",
                 },
                 {
                     field: "post_thickness",
                     name: "Post thickness",
                     type: "number",
                     default: 6.0,
-                    description: "Thickness of the post in mm. If 0 the post will be omitted",
+                    description:
+                        "Thickness of the post in mm. If 0 the post will be omitted",
+                },
+                {
+                    field: "rounding",
+                    name: "Rounding",
+                    type: "number",
+                    default: 0.5,
+                    description: "Rounding of the hook outer corners in mm",
+                },
+                variantParameter,
+            ],
+        },
+        rack: {
+            name: "Rack",
+            URL: "/api/rack",
+            parameters: [
+                {
+                    field: "slots",
+                    name: "Slots",
+                    type: "number",
+                    default: 7,
+                    description: "Number of slots",
+                },
+                {
+                    field: "slot_width",
+                    name: "Slot width",
+                    type: "number",
+                    default: 6.0,
+                    description: "Width of each slot in mm",
+                },
+                {
+                    field: "divider_width",
+                    name: "Divider width",
+                    type: "number",
+                    default: 10.0,
+                    description: "Width of dividers in mm",
+                },
+                {
+                    field: "divider_length",
+                    name: "Divider length",
+                    type: "number",
+                    default: 80.0,
+                    description: "Length of the dividers in mm",
+                },
+                {
+                    field: "divider_thickness",
+                    name: "Divider thickness",
+                    type: "number",
+                    default: 6.0,
+                    description: "Thickness of the dividers in mm",
+                },
+                {
+                    field: "lip",
+                    name: "Add lip",
+                    type: "boolean",
+                    default: false,
+                    description:
+                        "Whether to include a lip at the front of the dividers",
+                },
+                {
+                    field: "lip_height",
+                    name: "Lip height",
+                    type: "number",
+                    default: 8.0,
+                    description: "Height of the lip in mm",
+                },
+                {
+                    field: "lip_thickness",
+                    name: "Lip thickness",
+                    type: "number",
+                    default: 4.0,
+                    description: "Thickness of the lip in mm",
                 },
                 {
                     field: "rounding",
@@ -183,19 +261,6 @@
     function saveParameters() {
         parameterCache[selectedPartType] = { ...parameters };
         localStorage.setItem(parameterCacheKey, JSON.stringify(parameterCache));
-    }
-
-    function addSkipListEntry() {
-        if (!parameters.skip_list) {
-            parameters.skip_list = [];
-        }
-        parameters.skip_list = [...parameters.skip_list, [1, 1]];
-    }
-
-    function removeSkipListEntry(index) {
-        parameters.skip_list = parameters.skip_list.filter(
-            (_, i) => i !== index,
-        );
     }
 
     async function generate() {
@@ -331,7 +396,8 @@
                     {/if}
 
                     {#each partDescriptions[selectedPartType].parameters as parameter}
-                        <div>
+
+                        <!-- <div>
                             <label
                                 for={parameter.field}
                                 class="block text-gray-700 text-sm font-bold mb-2"
@@ -340,77 +406,18 @@
                             </label>
                             <p class="text-gray-500 text-sm mb-1">
                                 {parameter.description}
-                            </p>
+                            </p> -->
+
                             {#if parameter.type === "number"}
-                                <input
-                                    type="number"
-                                    step="any"
-                                    id={parameter.field}
-                                    bind:value={parameters[parameter.field]}
-                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                />
+                                <NumberParameter parameter={parameter} bind:value={parameters[parameter.field]}/>
                             {:else if parameter.type === "select"}
-                                <select
-                                    id={parameter.field}
-                                    bind:value={parameters[parameter.field]}
-                                    class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                >
-                                    {#each Object.entries(parameter.options) as [option, description]}
-                                        <option value={Number(option)}
-                                            >{description}</option
-                                        >
-                                    {/each}
-                                </select>
+                                <SelectParameter parameter={parameter} bind:value={parameters[parameter.field]}/>
+                            {:else if parameter.type === "boolean"}
+                                <BooleanParameter parameter={parameter} bind:value={parameters[parameter.field]}/>
                             {:else if parameter.type === "skip_list"}
-                                {#if Array.isArray(parameters[parameter.field])}
-                                    {#each parameters[parameter.field] as skip_tile, index}
-                                        <div
-                                            class="flex items-center space-x-2 mb-2"
-                                        >
-                                            <label
-                                                for={`row-${index}`}
-                                                class="text-gray-700 text-sm font-bold"
-                                                >Row:</label
-                                            >
-                                            <input
-                                                type="number"
-                                                id={`row-${index}`}
-                                                bind:value={parameters[
-                                                    parameter.field
-                                                ][index][0]}
-                                                class="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline w-20"
-                                            />
-                                            <label
-                                                for={`column-${index}`}
-                                                class="text-gray-700 text-sm font-bold"
-                                                >Column:</label
-                                            >
-                                            <input
-                                                type="number"
-                                                id={`column-${index}`}
-                                                bind:value={parameters[
-                                                    parameter.field
-                                                ][index][1]}
-                                                class="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline w-20"
-                                            />
-                                            <button
-                                                type="button"
-                                                on:click={() =>
-                                                    removeSkipListEntry(index)}
-                                                class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline"
-                                                >Remove</button
-                                            >
-                                        </div>
-                                    {/each}
-                                {/if}
-                                <button
-                                    type="button"
-                                    on:click={addSkipListEntry}
-                                    class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline"
-                                    >Add</button
-                                >
+                                <SkipListParameter parameter={parameter} bind:value={parameters[parameter.field]}/>
                             {/if}
-                        </div>
+                        <!-- </div> -->
                     {/each}
 
                     <div class="flex gap-2">

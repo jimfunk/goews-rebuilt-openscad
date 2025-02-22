@@ -4,14 +4,15 @@ include <constants.scad>
 use <hanger.scad>
 
 
-module hook(
-    width=10,
-    shank_length=10,
-    shank_thickness=8,
-    post_height=18,
-    post_thickness=6,
-    hooks=1,
-    gap=10,
+module rack(
+    slots=7,
+    slot_width=6,
+    divider_width=10,
+    divider_length=80,
+    divider_thickness=6,
+    lip=false,
+    lip_height=8,
+    lip_thickness=4,
     rounding=0.5,
     hanger_tolerance=0.15,
     variant=variant_original
@@ -20,7 +21,7 @@ module hook(
     hanger_total_thickness = hanger_thickness + hanger_plate_offset;
     plate_total_thickness = plate_thickness + hanger_total_thickness;
 
-    total_width = (width * hooks) + (gap * (hooks - 1));
+    total_width = (slot_width * slots) + (divider_width * (slots + 1));
 
     x_offset = (get_hanger_plate_width(total_width) - total_width) / 2;
     y_offset = plate_total_thickness;
@@ -33,21 +34,21 @@ module hook(
         );
 
         translate([x_offset, y_offset, 0]) {
-            for (i = [0:hooks - 1]) {
-                translate([(width + gap) * i, 0, 0]) {
-                    if (post_height && post_thickness) {
-                        // Shank
+            for (i = [0:slots]) {
+                translate([(slot_width + divider_width) * i, 0, 0]) {
+                    if (lip) {
+                        // Divider
                         cuboid(
-                            size=[width, shank_length, shank_thickness],
+                            size=[divider_width, divider_length, divider_thickness],
                             anchor=BOTTOM+FRONT+LEFT,
                             rounding=rounding,
                             edges=["Y"]
                         );
 
-                        // Post
-                        translate([0, shank_length, 0])
+                        // Lip
+                        translate([0, divider_length, 0])
                             cuboid(
-                                [width, post_thickness, post_height],
+                                [divider_width, lip_thickness, lip_height],
                                 anchor=BOTTOM+FRONT+LEFT,
                                 rounding=rounding,
                                 edges=[
@@ -57,9 +58,9 @@ module hook(
                                 ]
                             );
                     } else {
-                        // Shank only
+                        // Without lip
                         cuboid(
-                            size=[width, shank_length, shank_thickness],
+                            size=[divider_width, divider_length, divider_thickness],
                             anchor=BOTTOM+FRONT+LEFT,
                             rounding=rounding,
                             edges=["Y", BACK]

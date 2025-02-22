@@ -26,9 +26,10 @@ async def main(request):
 
 
 # Get the API calls loaded
-import server.tile
-import server.hook
 import server.bolt
+import server.hook
+import server.tile
+import server.rack
 
 
 if __name__ == "__main__":
