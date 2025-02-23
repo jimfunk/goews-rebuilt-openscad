@@ -49,6 +49,34 @@
                     description: "Tile rows in units",
                 },
                 {
+                    field: "fill_top",
+                    name: "Fill top",
+                    type: "boolean",
+                    default: false,
+                    description: "Fill the top row edge. Adds additional mounting holes",
+                },
+                {
+                    field: "fill_bottom",
+                    name: "Fill bottom",
+                    type: "boolean",
+                    default: false,
+                    description: "Fill the bottom row edge",
+                },
+                {
+                    field: "fill_left",
+                    name: "Fill left",
+                    type: "boolean",
+                    default: false,
+                    description: "Fill the left row edge",
+                },
+                {
+                    field: "fill_right",
+                    name: "Fill right",
+                    type: "boolean",
+                    default: false,
+                    description: "Fill the right row edge",
+                },
+                {
                     field: "skip_list",
                     name: "Skip list",
                     type: "skip_list",
@@ -396,7 +424,6 @@
                     {/if}
 
                     {#each partDescriptions[selectedPartType].parameters as parameter}
-
                         <!-- <div>
                             <label
                                 for={parameter.field}
@@ -408,15 +435,27 @@
                                 {parameter.description}
                             </p> -->
 
-                            {#if parameter.type === "number"}
-                                <NumberParameter parameter={parameter} bind:value={parameters[parameter.field]}/>
-                            {:else if parameter.type === "select"}
-                                <SelectParameter parameter={parameter} bind:value={parameters[parameter.field]}/>
-                            {:else if parameter.type === "boolean"}
-                                <BooleanParameter parameter={parameter} bind:value={parameters[parameter.field]}/>
-                            {:else if parameter.type === "skip_list"}
-                                <SkipListParameter parameter={parameter} bind:value={parameters[parameter.field]}/>
-                            {/if}
+                        {#if parameter.type === "number"}
+                            <NumberParameter
+                                {parameter}
+                                bind:value={parameters[parameter.field]}
+                            />
+                        {:else if parameter.type === "select"}
+                            <SelectParameter
+                                {parameter}
+                                bind:value={parameters[parameter.field]}
+                            />
+                        {:else if parameter.type === "boolean"}
+                            <BooleanParameter
+                                {parameter}
+                                bind:value={parameters[parameter.field]}
+                            />
+                        {:else if parameter.type === "skip_list"}
+                            <SkipListParameter
+                                {parameter}
+                                bind:value={parameters[parameter.field]}
+                            />
+                        {/if}
                         <!-- </div> -->
                     {/each}
 

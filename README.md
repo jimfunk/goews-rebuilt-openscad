@@ -14,6 +14,10 @@ the tiles by 60%.
 Arbitrary tiles of any size can be generated. Within the tiles hex units can be removed
 using a skip list to work around obstacles such as electrical receptables.
 
+Any tile edge can be optionally filled in. This is particularly useful for the top edge
+as it adds additional mounting holes that are more likely to hit a top plate on a
+standard drywall-covered wall.
+
 #### Thicker cleats
 
 The thicker cleats variant can hold 60% more weight when used without the threaded bolts. As a side-effect, the tiles actually use about 14% less filament and no longer have sharp edges.
@@ -25,6 +29,11 @@ thicker cleats held at 40lb and failed at 45lb.
 
 Hooks are similar to the original ones. The shank and post dimensions are
 configurable.
+
+### Racks
+
+Racks are a new type of part that can be used for hanging items with wide tops. This is
+quite useful for storing cables, bar clamps, screwdrivers, etc.
 
 ### Bolts
 

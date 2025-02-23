@@ -14,6 +14,10 @@ app = Sanic.get_app()
 class TileDefinition(BaseModel):
     columns: Annotated[int, Field(gt=0)]
     rows: Annotated[int, Field(gt=0)]
+    fill_top: bool
+    fill_bottom: bool
+    fill_left: bool
+    fill_right: bool
     skip_list: list[list[int, int]]
     variant: Variant
 
@@ -43,6 +47,10 @@ async def tile(request: Request, body: TileDefinition):
             variant=body.variant,
             tile_columns=body.columns,
             tile_rows=body.rows,
+            tile_fill_top=body.fill_top,
+            tile_fill_bottom=body.fill_bottom,
+            tile_fill_left=body.fill_left,
+            tile_fill_right=body.fill_right,
             tile_skip_list=skip_list,
         ),
         content_type="model/stl",

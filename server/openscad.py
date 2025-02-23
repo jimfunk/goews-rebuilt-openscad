@@ -37,6 +37,8 @@ async def build(**params) -> bytes:
         if value is not None:
             if isinstance(value, str):
                 cmd += ["-D", f'{name}="{value}"']
+            elif isinstance(value, bool):
+                cmd += ["-D", f'{name}={str(value).lower()}']
             else:
                 cmd += ["-D", f"{name}={value}"]
 

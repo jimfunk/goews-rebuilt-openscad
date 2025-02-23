@@ -38,7 +38,6 @@ module tile_cleat(variant=variant_original) {
 module hex_tile_single(variant=variant_original) {
     rear_cleat_thickness = variant == variant_original ? tile_hanger_rear_cleat_thickness : 0;
     cleat_additional_thickness = variant == variant_thicker_cleats ? hanger_offset : 0;
-    tile_total_thickness = hanger_thickness + rear_cleat_thickness + cleat_additional_thickness;
     hanger_x_offset = (tile_width - tile_hanger_width) / 2;
     tile_hanger_y_offset = tile_triangle_height;
     threaded_hole_center_x = tile_width / 2;
@@ -53,7 +52,7 @@ module hex_tile_single(variant=variant_original) {
                 regular_prism(n=6, h=tile_thickness, id=tile_width, center=false, chamfer2=0.5);
 
         // Space for hanger
-        linear_extrude(height=tile_total_thickness)
+        linear_extrude(height=tile_thickness)
             difference() {
                 translate([hanger_x_offset, tile_hanger_y_offset, 0])
                     square([tile_hanger_width, tile_hanger_height]);
@@ -65,7 +64,7 @@ module hex_tile_single(variant=variant_original) {
         translate([threaded_hole_center_x, threaded_hole_center_y, 0])
             threaded_rod(
                 d=thread_diameter + thread_tolerance,
-                length=tile_total_thickness,
+                length=tile_thickness,
                 pitch=thread_pitch,
                 internal=true,
                 blunt_start=false,
@@ -74,10 +73,10 @@ module hex_tile_single(variant=variant_original) {
 
         // Mounting hole
         translate([mounting_hole_center_x, mounting_hole_center_y, 0]) {
-            cylinder(h=tile_total_thickness, d=tile_mounting_hole_shank_diameter);
-            translate([0, 0, tile_total_thickness - tile_mounting_hole_countersink_inset_depth])
+            cylinder(h=tile_thickness, d=tile_mounting_hole_shank_diameter);
+            translate([0, 0, tile_thickness - tile_mounting_hole_countersink_inset_depth])
                 cylinder(h=tile_mounting_hole_countersink_inset_depth, d=tile_mounting_hole_countersink_diameter);
-            translate([0, 0, tile_total_thickness - tile_mounting_hole_countersink_inset_depth])
+            translate([0, 0, tile_thickness - tile_mounting_hole_countersink_inset_depth])
                 zcyl(h=tile_mounting_hole_countersink_depth, d1=tile_mounting_hole_shank_diameter, d2=tile_mounting_hole_countersink_diameter, anchor=TOP);
         }
     }
@@ -138,10 +137,125 @@ module hex_tile_single(variant=variant_original) {
 }
 
 
+module hex_fill_top(crop_left=false, crop_right=false) {
+    mounting_hole_center_x = tile_width / 2;
+    mounting_hole_center_y = tile_mounting_hole_y_offset;
+
+    difference() {
+        // Body
+        translate([tile_width / 2, tile_width / sqrt(3), 0])
+            rotate([0, 0, 90])
+                regular_prism(n=6, h=tile_thickness, id=tile_width, center=false, chamfer2=0.5);
+
+        // Crop top
+        translate([0, tile_triangle_height, 0])
+            cube([tile_width, tile_height - tile_triangle_height, tile_thickness]);
+
+        // Top chamfer
+        translate([tile_width / 2, tile_triangle_height, tile_thickness])
+            chamfer_edge_mask(l=tile_width, chamfer=0.5, orient=RIGHT);
+
+        if (! (crop_left || crop_right)) {
+            // Mounting hole
+            translate([mounting_hole_center_x, mounting_hole_center_y, 0]) {
+                cylinder(h=tile_thickness, d=tile_mounting_hole_shank_diameter);
+                translate([0, 0, tile_thickness - tile_mounting_hole_countersink_inset_depth])
+                    cylinder(h=tile_mounting_hole_countersink_inset_depth, d=tile_mounting_hole_countersink_diameter);
+                translate([0, 0, tile_thickness - tile_mounting_hole_countersink_inset_depth])
+                    zcyl(h=tile_mounting_hole_countersink_depth, d1=tile_mounting_hole_shank_diameter, d2=tile_mounting_hole_countersink_diameter, anchor=TOP);
+            }
+        }
+
+        if (crop_left) {
+            // Crop left side
+            translate([0, 0, 0])
+                cube([tile_width / 2, tile_height, tile_thickness]);
+            // Left chamfer
+            translate([tile_width / 2, tile_height / 2, tile_thickness])
+                chamfer_edge_mask(l=tile_height, chamfer=0.5, orient=FRONT);
+        }
+
+        if (crop_right) {
+            // Crop right side
+            translate([tile_width / 2, 0, 0])
+                cube([tile_width / 2, tile_height, tile_thickness]);
+            // Right chamfer
+            translate([tile_width / 2, tile_height / 2, tile_thickness])
+                chamfer_edge_mask(l=tile_height, chamfer=0.5, orient=FRONT);
+        }
+    }
+}
+
+module hex_fill_bottom(crop_left=false, crop_right=false) {
+    difference() {
+        // Body
+        translate([tile_width / 2, tile_triangle_height - (tile_height / 2), 0])
+            rotate([0, 0, 90])
+                regular_prism(n=6, h=tile_thickness, id=tile_width, center=false, chamfer2=0.5);
+
+        // Crop bottom
+        translate([0, -(tile_height - tile_triangle_height), 0])
+            cube([tile_width, tile_height - tile_triangle_height, tile_thickness]);
+
+        // Bottom chamfer
+        translate([tile_width / 2, 0, tile_thickness])
+            chamfer_edge_mask(l=tile_width, chamfer=0.5, orient=RIGHT);
+
+        if (crop_left) {
+            // Crop left side
+            translate([0, 0, 0])
+                cube([tile_width / 2, tile_height, tile_thickness]);
+            // Left chamfer
+            translate([tile_width / 2, tile_height / 2, tile_thickness])
+                chamfer_edge_mask(l=tile_height, chamfer=0.5, orient=FRONT);
+        }
+
+        if (crop_right) {
+            // Crop right side
+            translate([tile_width / 2, 0, 0])
+                cube([tile_width / 2, tile_height, tile_thickness]);
+            // Right chamfer
+            translate([tile_width / 2, tile_height / 2, tile_thickness])
+                chamfer_edge_mask(l=tile_height, chamfer=0.5, orient=FRONT);
+        }
+    }
+}
+
+
+module hex_fill_left() {
+    difference() {
+        translate([0, tile_height / 2, 0])
+            rotate([0, 0, 90])
+                regular_prism(n=6, h=tile_thickness, id=tile_width, center=false, chamfer2=0.5);
+        translate([- (tile_width / 2), 0, 0])
+            cube([tile_width / 2, tile_height, tile_thickness]);
+        translate([0, tile_height / 2, tile_thickness])
+            chamfer_edge_mask(l=tile_height, chamfer=0.5, orient=FRONT);
+    }
+}
+
+
+module hex_fill_right() {
+    difference() {
+        translate([tile_width / 2, tile_height / 2, 0])
+            rotate([0, 0, 90])
+                regular_prism(n=6, h=tile_thickness, id=tile_width, center=false, chamfer2=0.5);
+        translate([(tile_width / 2), 0, 0])
+            cube([tile_width / 2, tile_height, tile_thickness]);
+        translate([tile_width / 2, tile_height / 2, tile_thickness])
+            chamfer_edge_mask(l=tile_height, chamfer=0.5, orient=FRONT);
+    }
+}
+
+
 module tile(
     variant=variant_original,
     columns=4,
     rows=4,
+    fill_top=false,
+    fill_bottom=false,
+    fill_left=false,
+    fill_right=false,
     skiplist=[]
 ) {
     for (row = [0 : rows - 1]) {
@@ -154,6 +268,46 @@ module tile(
             if (!in_list([row + 1, column + 1], skiplist)) {
                 translate([pos_x, pos_y, 0])
                     hex_tile_single(variant = variant);
+            }
+            if (fill_left && column == 0 && offset_x) {
+                translate([0, pos_y, 0])
+                    hex_fill_left();
+            }
+            if (fill_right && column == (columns -1 ) && !offset_x) {
+                translate([pos_x + tile_width, pos_y, 0])
+                    hex_fill_right();
+            }
+        }
+
+        if (fill_top && row == (rows - 1)) {
+            // Fill in top row
+            even_row = (row + 1) % 2 == 0;
+            offset_x = even_row ? tile_width / 2 : tile_width;
+            crop_left = (column == 0 && ! fill_left);
+
+            for (column = [0 : columns]) {
+                pos_x = (offset_x + column * tile_width) - tile_width;
+                pos_y = tile_y_offset * (row + 1);
+                translate([pos_x, pos_y, 0])
+                    hex_fill_top(
+                        crop_left=(column == 0 && (!fill_left || even_row)),
+                        crop_right=(column == columns && (!fill_right || !even_row))
+                    );
+            }
+        }
+
+        if (fill_bottom && row == 0) {
+            // Fill in bottom row
+            offset_x = ((row + 1) % 2 == 0) ? tile_width / 2 : 0;
+
+            for (column = [0 : columns]) {
+                pos_x = (offset_x + column * tile_width);
+                pos_y = tile_y_offset * (row);
+                translate([pos_x, pos_y, 0])
+                    hex_fill_bottom(
+                        crop_left=(column == 0 && !fill_left),
+                        crop_right=(column == columns)
+                    );
             }
         }
     }

@@ -26,6 +26,18 @@ tile_columns = 4;
 // Tile rows in units
 tile_rows = 4;
 
+// Fill top row
+tile_fill_top = false;
+
+// Fill bottom row
+tile_fill_bottom = false;
+
+// Fill left side
+tile_fill_left = false;
+
+// Fill right side
+tile_fill_right = false;
+
 // List of tile positions to skip. Each entry is a pair of 1-based row and column coordinates with the origin at the lower left, eg: [1, 2], [3, 4]
 tile_skip_list = "";
 
@@ -100,6 +112,10 @@ if (part == 0)
         variant=variant,
         columns=tile_columns,
         rows=tile_rows,
+        fill_top=tile_fill_top,
+        fill_bottom=tile_fill_bottom,
+        fill_left=tile_fill_left,
+        fill_right=tile_fill_right,
         skiplist=parse_vector_list(tile_skip_list)
     );
 else if (part == 1)
