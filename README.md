@@ -72,5 +72,4 @@ PRs are welcome :-)
 * Boxes
 * Cups
 * Gridfinity plates
-* Tile edge fillers
 * Grid tiles

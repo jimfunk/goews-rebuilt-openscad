@@ -35,7 +35,13 @@ module tile_cleat(variant=variant_original) {
 }
 
 
-module hex_tile_single(variant=variant_original) {
+module hex_tile_single(
+    variant=variant_original,
+    mounting_hole_shank_diameter=4,
+    mounting_hole_head_diameter=8,
+    mounting_hole_inset_depth=1,
+    mounting_hole_countersink_depth=2
+) {
     rear_cleat_thickness = variant == variant_original ? tile_hanger_rear_cleat_thickness : 0;
     cleat_additional_thickness = variant == variant_thicker_cleats ? hanger_offset : 0;
     hanger_x_offset = (tile_width - tile_hanger_width) / 2;
@@ -73,11 +79,13 @@ module hex_tile_single(variant=variant_original) {
 
         // Mounting hole
         translate([mounting_hole_center_x, mounting_hole_center_y, 0]) {
-            cylinder(h=tile_thickness, d=tile_mounting_hole_shank_diameter);
-            translate([0, 0, tile_thickness - tile_mounting_hole_countersink_inset_depth])
-                cylinder(h=tile_mounting_hole_countersink_inset_depth, d=tile_mounting_hole_countersink_diameter);
-            translate([0, 0, tile_thickness - tile_mounting_hole_countersink_inset_depth])
-                zcyl(h=tile_mounting_hole_countersink_depth, d1=tile_mounting_hole_shank_diameter, d2=tile_mounting_hole_countersink_diameter, anchor=TOP);
+            cylinder(h=tile_thickness, d=mounting_hole_shank_diameter);
+            translate([0, 0, tile_thickness - mounting_hole_inset_depth])
+                cylinder(h=mounting_hole_inset_depth, d=mounting_hole_head_diameter);
+            if (mounting_hole_countersink_depth > 0) {
+                translate([0, 0, tile_thickness - mounting_hole_inset_depth])
+                    zcyl(h=mounting_hole_countersink_depth, d1=mounting_hole_shank_diameter, d2=mounting_hole_head_diameter, anchor=TOP);
+            }
         }
     }
 
@@ -137,7 +145,14 @@ module hex_tile_single(variant=variant_original) {
 }
 
 
-module hex_fill_top(crop_left=false, crop_right=false) {
+module hex_fill_top(
+    crop_left=false,
+    crop_right=false,
+    mounting_hole_shank_diameter=4,
+    mounting_hole_head_diameter=8,
+    mounting_hole_inset_depth=1,
+    mounting_hole_countersink_depth=2
+) {
     mounting_hole_center_x = tile_width / 2;
     mounting_hole_center_y = tile_mounting_hole_y_offset;
 
@@ -158,11 +173,11 @@ module hex_fill_top(crop_left=false, crop_right=false) {
         if (! (crop_left || crop_right)) {
             // Mounting hole
             translate([mounting_hole_center_x, mounting_hole_center_y, 0]) {
-                cylinder(h=tile_thickness, d=tile_mounting_hole_shank_diameter);
-                translate([0, 0, tile_thickness - tile_mounting_hole_countersink_inset_depth])
-                    cylinder(h=tile_mounting_hole_countersink_inset_depth, d=tile_mounting_hole_countersink_diameter);
-                translate([0, 0, tile_thickness - tile_mounting_hole_countersink_inset_depth])
-                    zcyl(h=tile_mounting_hole_countersink_depth, d1=tile_mounting_hole_shank_diameter, d2=tile_mounting_hole_countersink_diameter, anchor=TOP);
+                cylinder(h=tile_thickness, d=mounting_hole_shank_diameter);
+                translate([0, 0, tile_thickness - mounting_hole_inset_depth])
+                    cylinder(h=mounting_hole_inset_depth, d=mounting_hole_head_diameter);
+                translate([0, 0, tile_thickness - mounting_hole_inset_depth])
+                    zcyl(h=mounting_hole_countersink_depth, d1=mounting_hole_shank_diameter, d2=mounting_hole_head_diameter, anchor=TOP);
             }
         }
 
@@ -256,6 +271,10 @@ module tile(
     fill_bottom=false,
     fill_left=false,
     fill_right=false,
+    mounting_hole_shank_diameter=4,
+    mounting_hole_head_diameter=8,
+    mounting_hole_inset_depth=1,
+    mounting_hole_countersink_depth=2,
     skiplist=[]
 ) {
     for (row = [0 : rows - 1]) {
@@ -267,7 +286,13 @@ module tile(
 
             if (!in_list([row + 1, column + 1], skiplist)) {
                 translate([pos_x, pos_y, 0])
-                    hex_tile_single(variant = variant);
+                    hex_tile_single(
+                        variant=variant,
+                        mounting_hole_shank_diameter=mounting_hole_shank_diameter,
+                        mounting_hole_head_diameter=mounting_hole_head_diameter,
+                        mounting_hole_countersink_depth=mounting_hole_countersink_depth,
+                        mounting_hole_inset_depth=mounting_hole_inset_depth
+                    );
             }
             if (fill_left && column == 0 && offset_x) {
                 translate([0, pos_y, 0])

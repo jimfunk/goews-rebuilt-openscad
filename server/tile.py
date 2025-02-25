@@ -18,6 +18,10 @@ class TileDefinition(BaseModel):
     fill_bottom: bool
     fill_left: bool
     fill_right: bool
+    mounting_hole_shank_diameter: Annotated[float, Field(gt=0)]
+    mounting_hole_head_diameter: Annotated[float, Field(gt=0)]
+    mounting_hole_inset_depth: Annotated[float, Field(gt=0)]
+    mounting_hole_countersink_depth: Annotated[float, Field(gte=0)]
     skip_list: list[list[int, int]]
     variant: Variant
 
@@ -51,6 +55,10 @@ async def tile(request: Request, body: TileDefinition):
             tile_fill_bottom=body.fill_bottom,
             tile_fill_left=body.fill_left,
             tile_fill_right=body.fill_right,
+            tile_mounting_hole_shank_diameter=body.mounting_hole_shank_diameter,
+            tile_mounting_hole_head_diameter=body.mounting_hole_head_diameter,
+            tile_mounting_hole_inset_depth=body.mounting_hole_inset_depth,
+            tile_mounting_hole_countersink_depth=body.mounting_hole_countersink_depth,
             tile_skip_list=skip_list,
         ),
         content_type="model/stl",

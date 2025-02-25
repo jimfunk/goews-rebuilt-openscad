@@ -38,6 +38,18 @@ tile_fill_left = false;
 // Fill right side
 tile_fill_right = false;
 
+// Mounting hole shank diameter
+tile_mounting_hole_shank_diameter = 4;
+
+// Mounting hole head diameter
+tile_mounting_hole_head_diameter = 8;
+
+// Mounting hole inset depth
+tile_mounting_hole_inset_depth = 1;
+
+// Mounting hole countersink depth. Set to 0 to disable countersink
+tile_mounting_hole_countersink_depth = 2;
+
 // List of tile positions to skip. Each entry is a pair of 1-based row and column coordinates with the origin at the lower left, eg: [1, 2], [3, 4]
 tile_skip_list = "";
 
@@ -116,6 +128,10 @@ if (part == 0)
         fill_bottom=tile_fill_bottom,
         fill_left=tile_fill_left,
         fill_right=tile_fill_right,
+        mounting_hole_shank_diameter=tile_mounting_hole_shank_diameter,
+        mounting_hole_head_diameter=tile_mounting_hole_head_diameter,
+        mounting_hole_inset_depth=tile_mounting_hole_inset_depth,
+        mounting_hole_countersink_depth=tile_mounting_hole_countersink_depth,
         skiplist=parse_vector_list(tile_skip_list)
     );
 else if (part == 1)

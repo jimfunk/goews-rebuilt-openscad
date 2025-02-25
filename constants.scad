@@ -102,18 +102,6 @@ thread_tolerance = 0.5;
 // Distance between bottom of tile and center of mounting hole
 tile_mounting_hole_y_offset = 6;
 
-// Mounting hold shank diameter
-tile_mounting_hole_shank_diameter = 4;
-
-// Mounting hole countersink diameter
-tile_mounting_hole_countersink_diameter = 8;
-
-// Mounting hole countersink depth
-tile_mounting_hole_countersink_depth = 2;
-
-// Mounting hole countersink inset depth
-tile_mounting_hole_countersink_inset_depth = 1;
-
 // Bolt head outer diameter
 bolt_head_outer_diameter = 19.35;
 
