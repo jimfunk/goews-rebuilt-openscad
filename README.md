@@ -11,12 +11,18 @@ the tiles by 60%.
 
 ### Tiles
 
-Arbitrary tiles of any size can be generated. Within the tiles hex units can be removed
-using a skip list to work around obstacles such as electrical receptables.
+Arbitrary tiles of any size, both hex and grid, can be generated. Within the tiles
+units can be removed using a skip list to work around obstacles such as electrical
+receptables.
 
-Any tile edge can be optionally filled in. This is particularly useful for the top edge
-as it adds additional mounting holes that are more likely to hit a top plate on a
-standard drywall-covered wall.
+The tile mounting holes can be adjusted as well to accomodate different screw sizes and
+types. Setting the countersink to 0 allows for flat screws to be used. This is
+particularly useful to account for when anchors are not perfectly aligned avoiding
+having to make new holes in your wall.
+
+For hex tiles any tile edge can be optionally filled in. This is particularly useful
+for the top edge as it adds additional mounting holes that are more likely to hit a top
+plate on a standard drywall-covered wall.
 
 #### Thicker cleats
 
@@ -72,4 +78,3 @@ PRs are welcome :-)
 * Boxes
 * Cups
 * Gridfinity plates
-* Grid tiles

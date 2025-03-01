@@ -57,6 +57,12 @@ tile_width = 42;
 // Tile height is derived from the width
 tile_height = (2 * tile_width * sqrt(3)) / 3;
 
+// Grid tile height
+grid_tile_height = 36.373;
+
+// Distance between bottom of grid tile and hanger
+grid_hanger_y_offset = 3;
+
 // The height of the triangles at the top and bottom of the hex tiles are derived from
 // the width
 tile_triangle_height = tile_width * (1 - sqrt(2) / 2);
@@ -90,6 +96,9 @@ tile_hanger_hole_outer_diameter = 9;
 // Distance between top of tile and center of threaded hole
 tile_threaded_hole_y_offset = 11.55;
 
+// Distance between top of hanger and center of threaded hole
+tile_threaded_hole_y_offset_from_hanger_top = (tile_height - tile_threaded_hole_y_offset) - (tile_triangle_height + tile_hanger_height);
+
 // Thread diameter
 thread_diameter = 14;
 
@@ -101,6 +110,12 @@ thread_tolerance = 0.5;
 
 // Distance between bottom of tile and center of mounting hole
 tile_mounting_hole_y_offset = 6;
+
+// Distance between bottom of grid tile and center of mounting holes
+grid_tile_mounting_hole_y_offset = 30.436;
+
+// Distance between side of grid tile and center of mounting hole
+grid_tile_mounting_hole_x_offset = 8.3;
 
 // Bolt head outer diameter
 bolt_head_outer_diameter = 19.35;

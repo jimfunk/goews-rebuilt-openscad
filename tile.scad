@@ -35,12 +35,32 @@ module tile_cleat(variant=variant_original) {
 }
 
 
+module mounting_hole(
+    mounting_hole_shank_diameter=4,
+    mounting_hole_head_diameter=8,
+    mounting_hole_inset_depth=1,
+    mounting_hole_countersink_depth=2,
+) {
+        cylinder(h=tile_thickness, d=mounting_hole_shank_diameter);
+        translate([0, 0, tile_thickness - mounting_hole_inset_depth])
+            cylinder(h=mounting_hole_inset_depth, d=mounting_hole_head_diameter);
+        if (mounting_hole_countersink_depth > 0) {
+            translate([0, 0, tile_thickness - mounting_hole_inset_depth])
+                zcyl(h=mounting_hole_countersink_depth, d1=mounting_hole_shank_diameter, d2=mounting_hole_head_diameter, anchor=TOP);
+        }
+}
+
+
 module hex_tile_single(
     variant=variant_original,
     mounting_hole_shank_diameter=4,
     mounting_hole_head_diameter=8,
     mounting_hole_inset_depth=1,
-    mounting_hole_countersink_depth=2
+    mounting_hole_countersink_depth=2,
+    cut_left_corner=false,
+    cut_left_corners=false,
+    cut_right_corner=false,
+    cut_right_corners=false
 ) {
     rear_cleat_thickness = variant == variant_original ? tile_hanger_rear_cleat_thickness : 0;
     cleat_additional_thickness = variant == variant_thicker_cleats ? hanger_offset : 0;
@@ -55,7 +75,32 @@ module hex_tile_single(
         // Outer hex tile
         translate([tile_width / 2, tile_width / sqrt(3), 0])
             rotate([0, 0, 90])
-                regular_prism(n=6, h=tile_thickness, id=tile_width, center=false, chamfer2=0.5);
+            diff() {
+                regular_prism(n=6, h=tile_thickness, id=tile_width, center=false, chamfer2=0.5) {
+                    tag("remove") {
+                        if (cut_left_corner || cut_left_corners) {
+                            attach("edge4")
+                                translate([0, tile_thickness / 2, 0])
+                                    cuboid([2, tile_thickness, .75], anchor=CENTER);
+                        }
+                        if (cut_left_corners) {
+                            attach("edge5")
+                                translate([0, tile_thickness / 2, 0])
+                                    cuboid([2, tile_thickness, .75], anchor=CENTER);
+                        }
+                        if (cut_right_corner || cut_right_corners) {
+                            attach("edge1")
+                                translate([0, tile_thickness / 2, 0])
+                                    cuboid([2, tile_thickness, .75], anchor=CENTER);
+                        }
+                        if (cut_right_corners) {
+                            attach("edge2")
+                                translate([0, tile_thickness / 2, 0])
+                                    cuboid([2, tile_thickness, .75], anchor=CENTER);
+                        }
+                    }
+                }
+            }
 
         // Space for hanger
         linear_extrude(height=tile_thickness)
@@ -79,13 +124,12 @@ module hex_tile_single(
 
         // Mounting hole
         translate([mounting_hole_center_x, mounting_hole_center_y, 0]) {
-            cylinder(h=tile_thickness, d=mounting_hole_shank_diameter);
-            translate([0, 0, tile_thickness - mounting_hole_inset_depth])
-                cylinder(h=mounting_hole_inset_depth, d=mounting_hole_head_diameter);
-            if (mounting_hole_countersink_depth > 0) {
-                translate([0, 0, tile_thickness - mounting_hole_inset_depth])
-                    zcyl(h=mounting_hole_countersink_depth, d1=mounting_hole_shank_diameter, d2=mounting_hole_head_diameter, anchor=TOP);
-            }
+            mounting_hole(
+                mounting_hole_shank_diameter=mounting_hole_shank_diameter,
+                mounting_hole_head_diameter=mounting_hole_head_diameter,
+                mounting_hole_inset_depth=mounting_hole_inset_depth,
+                mounting_hole_countersink_depth=mounting_hole_countersink_depth
+            );
         }
     }
 
@@ -135,12 +179,12 @@ module hex_tile_single(
 
     // Rear cleats (Only for the original variant)
     if (variant == variant_original) {
-        translate([0, tile_triangle_height, 0])
+        translate([1, tile_triangle_height, 0])
             linear_extrude(height = tile_hanger_rear_cleat_thickness)
-                square([tile_hanger_rear_cleat_x_offset, tile_hanger_height]);
+                square([tile_hanger_rear_cleat_x_offset-1, tile_hanger_height]);
         translate([tile_width - tile_hanger_rear_cleat_x_offset, tile_triangle_height, 0])
             linear_extrude(height = tile_hanger_rear_cleat_thickness)
-                square([tile_hanger_rear_cleat_x_offset, tile_hanger_height]);
+                square([tile_hanger_rear_cleat_x_offset - 1, tile_hanger_height]);
     }
 }
 
@@ -275,7 +319,8 @@ module tile(
     mounting_hole_head_diameter=8,
     mounting_hole_inset_depth=1,
     mounting_hole_countersink_depth=2,
-    skiplist=[]
+    skiplist=[],
+    cut_outside_corners=false
 ) {
     for (row = [0 : rows - 1]) {
         offset_x = (row % 2 == 0) ? tile_width / 2 : 0;
@@ -291,7 +336,11 @@ module tile(
                         mounting_hole_shank_diameter=mounting_hole_shank_diameter,
                         mounting_hole_head_diameter=mounting_hole_head_diameter,
                         mounting_hole_countersink_depth=mounting_hole_countersink_depth,
-                        mounting_hole_inset_depth=mounting_hole_inset_depth
+                        mounting_hole_inset_depth=mounting_hole_inset_depth,
+                        cut_left_corner=(row == 0 && column == 0) ? cut_outside_corners : false,
+                        cut_left_corners=(row % 2 == 1) && column == 0 ? cut_outside_corners : false,
+                        cut_right_corner=(row == (rows - 1) && column == (columns - 1)) ? cut_outside_corners : false,
+                        cut_right_corners=(row % 2 == 0 && column == (columns - 1)) ? cut_outside_corners : false
                     );
             }
             if (fill_left && column == 0 && offset_x) {
@@ -350,4 +399,161 @@ module tile(
  * Original lite 4x4: 2 hours 54 minutes, 53g (8.6% reduction in filament)
  * Rebuilt original 4x4: 3 hours 11 minutes, 54g (6.9% reduction in filament)
  * Rebuilt thicker cleats 4x4: 3 hours 1 minute, 50g (13.8% reduction in filament)
+ */
+
+
+module grid_tile_single(
+    variant=variant_original,
+    mounting_hole_shank_diameter=4,
+    mounting_hole_head_diameter=8,
+    mounting_hole_inset_depth=1,
+    mounting_hole_countersink_depth=2
+) {
+    rear_cleat_thickness = variant == variant_original ? tile_hanger_rear_cleat_thickness : 0;
+    cleat_additional_thickness = variant == variant_thicker_cleats ? hanger_offset : 0;
+    hanger_x_offset = (tile_width - tile_hanger_width) / 2;
+    threaded_hole_center_x = tile_width / 2;
+    threaded_hole_center_y = grid_hanger_y_offset + tile_hanger_height + tile_threaded_hole_y_offset_from_hanger_top;
+    mounting_hole_center_x = tile_width / 2;
+    mounting_hole_center_y = tile_mounting_hole_y_offset;
+
+    difference() {
+        // Outer tile
+        translate([tile_width / 2, grid_tile_height / 2, 0])
+            cuboid([tile_width, grid_tile_height, tile_thickness], anchor=BOTTOM, chamfer=0.5, edges=TOP);
+
+        // Space for hanger
+        linear_extrude(height=tile_thickness)
+            difference() {
+                translate([hanger_x_offset, grid_hanger_y_offset, 0])
+                    square([tile_hanger_width, tile_hanger_height]);
+                translate([threaded_hole_center_x, threaded_hole_center_y, 0])
+                    circle(tile_hanger_hole_outer_diameter);
+            }
+
+        // Threaded hole
+        translate([threaded_hole_center_x, threaded_hole_center_y, 0])
+            threaded_rod(
+                d=thread_diameter + thread_tolerance,
+                length=tile_thickness,
+                pitch=thread_pitch,
+                internal=true,
+                blunt_start=false,
+                anchor=BOTTOM
+            );
+
+        // Mounting holes
+        translate([grid_tile_mounting_hole_x_offset, grid_tile_mounting_hole_y_offset, 0]) {
+            mounting_hole(
+                mounting_hole_shank_diameter=mounting_hole_shank_diameter,
+                mounting_hole_head_diameter=mounting_hole_head_diameter,
+                mounting_hole_inset_depth=mounting_hole_inset_depth,
+                mounting_hole_countersink_depth=mounting_hole_countersink_depth
+            );
+        }
+        translate([tile_width - grid_tile_mounting_hole_x_offset, grid_tile_mounting_hole_y_offset, 0]) {
+            mounting_hole(
+                mounting_hole_shank_diameter=mounting_hole_shank_diameter,
+                mounting_hole_head_diameter=mounting_hole_head_diameter,
+                mounting_hole_inset_depth=mounting_hole_inset_depth,
+                mounting_hole_countersink_depth=mounting_hole_countersink_depth
+            );
+        }
+    }
+
+    // Left rear chamfer
+    translate([hanger_x_offset, grid_hanger_y_offset, rear_cleat_thickness])
+        rotate([90, 270, 180])
+            linear_extrude(height = tile_hanger_height)
+                polygon(
+                    points=[
+                        [0, 0],
+                        [hanger_thickness / 2, 0],
+                        [0, hanger_thickness / 2]
+                    ]
+                );
+
+    // Left front cleat
+    translate([hanger_x_offset, grid_hanger_y_offset, (hanger_thickness / 2) + rear_cleat_thickness])
+        tile_cleat(variant=variant);
+
+    // Right rear chamfer
+    translate([tile_width - hanger_x_offset, grid_hanger_y_offset + tile_hanger_height, rear_cleat_thickness])
+        rotate([0, 270, 90])
+            linear_extrude(height = tile_hanger_height)
+                polygon(
+                    points=[
+                        [0, 0],
+                        [hanger_thickness / 2, 0],
+                        [0, hanger_thickness / 2],
+                    ]
+                );
+
+    // Right front cleat
+    translate([hanger_x_offset + tile_hanger_width, grid_hanger_y_offset, (hanger_thickness / 2) + rear_cleat_thickness])
+        xflip() tile_cleat(variant=variant);
+
+    // Lower rear chamfer
+    translate([hanger_x_offset + tile_hanger_width, grid_hanger_y_offset])
+        rotate([0, 270, 0])
+            linear_extrude(height = tile_hanger_width)
+                polygon(
+                    points=[
+                        [0, 0],
+                        [hanger_thickness - cleat_additional_thickness + rear_cleat_thickness, 0],
+                        [0, hanger_thickness - cleat_additional_thickness + rear_cleat_thickness]
+                    ]
+                );
+
+    // Rear cleats (Only for the original variant)
+    if (variant == variant_original) {
+        translate([0, grid_hanger_y_offset, 0])
+            linear_extrude(height = tile_hanger_rear_cleat_thickness)
+                square([tile_hanger_rear_cleat_x_offset, tile_hanger_height]);
+        translate([tile_width - tile_hanger_rear_cleat_x_offset, grid_hanger_y_offset, 0])
+            linear_extrude(height = tile_hanger_rear_cleat_thickness)
+                square([tile_hanger_rear_cleat_x_offset, tile_hanger_height]);
+    }
+}
+
+
+module grid_tile(
+    variant=variant_original,
+    columns=4,
+    rows=4,
+    mounting_hole_shank_diameter=4,
+    mounting_hole_head_diameter=8,
+    mounting_hole_inset_depth=1,
+    mounting_hole_countersink_depth=2,
+    skiplist=[]
+) {
+    for (row = [0 : rows - 1]) {
+        for (column = [0 : columns - 1]) {
+            pos_x = column * tile_width;
+            pos_y = row * grid_tile_height;
+
+            if (!in_list([row + 1, column + 1], skiplist)) {
+                translate([pos_x, pos_y, 0])
+                    grid_tile_single(
+                        variant=variant,
+                        mounting_hole_shank_diameter=mounting_hole_shank_diameter,
+                        mounting_hole_head_diameter=mounting_hole_head_diameter,
+                        mounting_hole_countersink_depth=mounting_hole_countersink_depth,
+                        mounting_hole_inset_depth=mounting_hole_inset_depth
+                    );
+            }
+        }
+    }
+}
+
+/*
+ * Print time and filament use comparisons
+ *
+ * Original 6x6:7 hours 32 minutes, 124g
+ * Rebuilt original 6x6: 7 hours 20 minutes, 120g (3.2% reduction in filament)
+ * Rebuilt thicker cleats 6x6: 6 hours, 52 minutes, 112g (9.7% reduction in filament)
+ *
+ * Original 4x4: 3 hours 25 minutes, 56g
+ * Rebuilt original 4x4: 3 hours 18 minutes, 54g (3.6% reduction in filament)
+ * Rebuilt thicker cleats 4x4: 3 hours 5 minutes, 51g (8.9% reduction in filament)
  */

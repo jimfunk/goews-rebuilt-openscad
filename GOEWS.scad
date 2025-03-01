@@ -11,7 +11,7 @@ use <tile.scad>
 
 /* [Primary parameters] */
 // Which part to build
-part = 0; // [0: Tile, 1: Hook, 2: Bolt, 3: Rack]
+part = 0; // [0: Tile, 1: Hook, 2: Bolt, 3: Rack, 4: Grid Tile]
 
 // Which variant to use
 variant = 0; // [0: Original, 1: Thicker cleats]
@@ -165,4 +165,15 @@ else if (part == 3)
         rounding=rack_rounding,
         hanger_tolerance=hanger_tolerance,
         variant=variant
+    );
+else if (part == 4)
+    grid_tile(
+        variant=variant,
+        columns=tile_columns,
+        rows=tile_rows,
+        mounting_hole_shank_diameter=tile_mounting_hole_shank_diameter,
+        mounting_hole_head_diameter=tile_mounting_hole_head_diameter,
+        mounting_hole_inset_depth=tile_mounting_hole_inset_depth,
+        mounting_hole_countersink_depth=tile_mounting_hole_countersink_depth,
+        skiplist=parse_vector_list(tile_skip_list)
     );

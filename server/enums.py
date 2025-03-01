@@ -6,6 +6,7 @@ class Part(IntEnum):
     Hook = 1
     Bolt = 2
     Rack = 3
+    GridTile = 4
 
 
 class Variant(IntEnum):
