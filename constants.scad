@@ -67,6 +67,7 @@ grid_hanger_y_offset = 3;
 // the width
 tile_triangle_height = tile_width * (1 - sqrt(2) / 2);
 
+// The center offset of a row above another
 tile_y_offset = tile_width * sqrt(3) / 2;
 
 // Chamfer around top of tile
