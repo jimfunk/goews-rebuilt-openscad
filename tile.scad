@@ -254,11 +254,12 @@ module hex_fill_top(
         if (! (crop_left || crop_right)) {
             // Mounting hole
             translate([mounting_hole_center_x, mounting_hole_center_y, 0]) {
-                cylinder(h=tile_thickness, d=mounting_hole_shank_diameter);
-                translate([0, 0, tile_thickness - mounting_hole_inset_depth])
-                    cylinder(h=mounting_hole_inset_depth, d=mounting_hole_head_diameter);
-                translate([0, 0, tile_thickness - mounting_hole_inset_depth])
-                    zcyl(h=mounting_hole_countersink_depth, d1=mounting_hole_shank_diameter, d2=mounting_hole_head_diameter, anchor=TOP);
+                mounting_hole(
+                    mounting_hole_shank_diameter=mounting_hole_shank_diameter,
+                    mounting_hole_head_diameter=mounting_hole_head_diameter,
+                    mounting_hole_inset_depth=mounting_hole_inset_depth,
+                    mounting_hole_countersink_depth=mounting_hole_countersink_depth
+                );
             }
         }
 
