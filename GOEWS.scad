@@ -2,7 +2,9 @@ include <BOSL2/std.scad>
 include <BOSL2/threading.scad>
 
 include <constants.scad>
+use <bin.scad>
 use <bolt.scad>
+use <cup.scad>
 use <hanger.scad>
 use <hook.scad>
 use <parsers.scad>
@@ -12,7 +14,7 @@ use <tile.scad>
 
 /* [Primary parameters] */
 // Which part to build
-part = 0; // [0: Tile, 1: Hook, 2: Bolt, 3: Rack, 4: Grid Tile, 5: Shelf, 6: Hole shelf, 7: Slot shelf]
+part = 0; // [0: Tile, 1: Hook, 2: Bolt, 3: Rack, 4: Grid Tile, 5: Shelf, 6: Hole shelf, 7: Slot shelf, 8: Bin, 9: Cup]
 
 // Which variant to use
 variant = 0; // [0: Original, 1: Thicker cleats]
@@ -141,25 +143,25 @@ hole_shelf_rows = 1;
 hole_shelf_thickness = 4;
 
 // Hole radius in mm
-hole_shelf_hole_radius=3.5;
+hole_shelf_hole_radius = 3.5;
 
 // Gap between holes in a column in mm
-hole_shelf_column_gap=15;
+hole_shelf_column_gap = 15;
 
 // Gap between holes in a row in mm
-hole_shelf_row_gap=15;
+hole_shelf_row_gap = 15;
 
 // Gap between front of shelf and the front holes in mm
-hole_shelf_front_gap=15;
+hole_shelf_front_gap = 15;
 
 // Gap between back of shelf and the rear holes in mm
-hole_shelf_rear_gap=15;
+hole_shelf_rear_gap = 15;
 
 // Gap between side of shelf and the side holes in mm
-hole_shelf_side_gap=15;
+hole_shelf_side_gap = 15;
 
 // Stagger rows
-hole_shelf_stagger=false;
+hole_shelf_stagger = false;
 
 // Shelf rear fillet radius in mm
 hole_shelf_rear_fillet_radius = 1;
@@ -200,6 +202,51 @@ slot_shelf_rear_fillet_radius = 1;
 
 // Shelf rounding on the front edges in mm
 slot_shelf_rounding = 0.5;
+
+/* [Bin parameters] */
+// Bin width in mm
+bin_width = 41.5;
+
+// Bin depth in mm
+bin_depth = 41.5;
+
+// Bin height in mm
+bin_height = 20;
+
+// Bin wall thickness in mm
+bin_wall_thickness = 1;
+
+// Bin bottom thickness in mm
+bin_bottom_thickness = 2;
+
+// Bin lip thickness in mm
+bin_lip_thickness = 1;
+
+// Bin inner rounding in mm
+bin_inner_rounding = 1;
+
+// Bin outer rounding in mm
+bin_outer_rounding = 0.5;
+
+
+/* [Cup parameters] */
+// Inner diameter in mm
+cup_inner_diameter = 37.5;
+
+// Height in mm
+cup_height = 24.39;
+
+// Wall thickness in mm
+cup_wall_thickness = 2;
+
+// Bottom thickness in mm
+cup_bottom_thickness = 2;
+
+// Outer rouding in mm
+cup_inner_rounding = 0.5;
+
+// Inner rounding in mm
+cup_outer_rounding = 0.5;
 
 
 /* [Hidden] */
@@ -306,6 +353,30 @@ else if (part == 7)
         side_gap=slot_shelf_side_gap,
         rear_fillet_radius=slot_shelf_rear_fillet_radius,
         rounding=slot_shelf_rounding,
+        hanger_tolerance=hanger_tolerance,
+        variant=variant
+    );
+else if (part == 8)
+    bin(
+        width=bin_width,
+        depth=bin_depth,
+        height=bin_height,
+        wall_thickness=bin_wall_thickness,
+        bottom_thickness=bin_bottom_thickness,
+        lip_thickness=bin_lip_thickness,
+        inner_rounding=bin_inner_rounding,
+        outer_rounding=bin_outer_rounding,
+        hanger_tolerance=hanger_tolerance,
+        variant=variant
+    );
+else if (part == 9)
+    cup(
+        inner_diameter=cup_inner_diameter,
+        height=cup_height,
+        wall_thickness=cup_wall_thickness,
+        bottom_thickness=cup_bottom_thickness,
+        inner_rounding=cup_inner_rounding,
+        outer_rounding=cup_outer_rounding,
         hanger_tolerance=hanger_tolerance,
         variant=variant
     );

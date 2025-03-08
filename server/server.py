@@ -26,7 +26,9 @@ async def main(request):
 
 
 # Get the API calls loaded
+import server.bin
 import server.bolt
+import server.cup
 import server.hook
 import server.tile
 import server.rack

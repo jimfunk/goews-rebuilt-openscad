@@ -10,6 +10,8 @@ class Part(IntEnum):
     Shelf = 5
     HoleShelf = 6
     SlotShelf = 7
+    Bin = 8
+    Cup = 9
 
 
 class Variant(IntEnum):

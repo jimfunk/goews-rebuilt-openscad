@@ -45,6 +45,14 @@ quite useful for storing cables, bar clamps, screwdrivers, etc.
 
 Shelves can be generated with any width and depth. There are variants with holes and slots as well.
 
+### Bins
+
+Bins are simple square bins with customizable width, depth, and height.
+
+### Cups
+
+Cups are simple cups with customizable inner diameter and height.
+
 ### Bolts
 
 Bolts are similar to the original ones. The length and socket width are configurable.
@@ -76,8 +84,9 @@ actually writable by the `goews` user.
 
 ## TODO
 
-PRs are welcome :-)
+PRs and suggestions are welcome :-)
 
-* Boxes
-* Cups
 * Gridfinity plates
+* Shelf supports
+* Bins with dividers
+* Multi-cups
