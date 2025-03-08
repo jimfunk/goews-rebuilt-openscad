@@ -7,6 +7,9 @@ class Part(IntEnum):
     Bolt = 2
     Rack = 3
     GridTile = 4
+    Shelf = 5
+    HoleShelf = 6
+    SlotShelf = 7
 
 
 class Variant(IntEnum):

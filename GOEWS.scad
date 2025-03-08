@@ -7,11 +7,12 @@ use <hanger.scad>
 use <hook.scad>
 use <parsers.scad>
 use <rack.scad>
+use <shelf.scad>
 use <tile.scad>
 
 /* [Primary parameters] */
 // Which part to build
-part = 0; // [0: Tile, 1: Hook, 2: Bolt, 3: Rack, 4: Grid Tile]
+part = 0; // [0: Tile, 1: Hook, 2: Bolt, 3: Rack, 4: Grid Tile, 5: Shelf, 6: Hole shelf, 7: Slot shelf]
 
 // Which variant to use
 variant = 0; // [0: Original, 1: Thicker cleats]
@@ -113,6 +114,94 @@ bolt_length = 9;
 // Bolt socket width in mm
 bolt_socket_width = 8.4;
 
+/* [Shelf parameters] */
+// Shelf width
+shelf_width = 83.5;
+
+// Shelf depth
+shelf_depth = 30;
+
+// Shelf thickness
+shelf_thickness = 4;
+
+// Shelf rear fillet radius in mm
+shelf_rear_fillet_radius = 1;
+
+// Shelf rounding on the front edges in mm
+shelf_rounding = 0.5;
+
+/* [Hole shelf parameters] */
+// Number of columns in the shelf
+hole_shelf_columns = 3;
+
+// Number of rows in the shelf
+hole_shelf_rows = 1;
+
+// Shelf thickness
+hole_shelf_thickness = 4;
+
+// Hole radius in mm
+hole_shelf_hole_radius=3.5;
+
+// Gap between holes in a column in mm
+hole_shelf_column_gap=15;
+
+// Gap between holes in a row in mm
+hole_shelf_row_gap=15;
+
+// Gap between front of shelf and the front holes in mm
+hole_shelf_front_gap=15;
+
+// Gap between back of shelf and the rear holes in mm
+hole_shelf_rear_gap=15;
+
+// Gap between side of shelf and the side holes in mm
+hole_shelf_side_gap=15;
+
+// Stagger rows
+hole_shelf_stagger=false;
+
+// Shelf rear fillet radius in mm
+hole_shelf_rear_fillet_radius = 1;
+
+// Shelf rounding on the front edges in mm
+hole_shelf_rounding = 0.5;
+
+/* [Slot shelf parameters] */
+// Number of slots in the shelf
+slot_shelf_slots = 4;
+
+// Shelf thickness
+slot_shelf_thickness = 4;
+
+// Slot length in mm
+slot_shelf_slot_length = 40;
+
+// Slot width in mm
+slot_shelf_slot_width = 10;
+
+// Slot corner rounding in mm
+slot_shelf_slot_rounding = 1;
+
+// Gap between slots in mm
+slot_shelf_gap = 10;
+
+// Gap between front of shelf and slots in mm
+slot_shelf_front_gap = 5;
+
+// Gap between rear of shelf and slots in mm
+slot_shelf_rear_gap = 10;
+
+// Gap between side of shelf and slots in mm
+slot_shelf_side_gap = 5;
+
+// Shelf rear fillet radius in mm
+slot_shelf_rear_fillet_radius = 1;
+
+// Shelf rounding on the front edges in mm
+slot_shelf_rounding = 0.5;
+
+
 /* [Hidden] */
 $fa=0.5;
 $fs=0.5;
@@ -176,4 +265,47 @@ else if (part == 4)
         mounting_hole_inset_depth=tile_mounting_hole_inset_depth,
         mounting_hole_countersink_depth=tile_mounting_hole_countersink_depth,
         skiplist=parse_vector_list(tile_skip_list)
+    );
+else if (part == 5)
+    shelf(
+        width=shelf_width,
+        depth=shelf_depth,
+        thickness=shelf_thickness,
+        rear_fillet_radius=shelf_rear_fillet_radius,
+        rounding=shelf_rounding,
+        hanger_tolerance=hanger_tolerance,
+        variant=variant
+    );
+else if (part == 6)
+    hole_shelf(
+        thickness=hole_shelf_thickness,
+        columns=hole_shelf_columns,
+        rows=hole_shelf_rows,
+        hole_radius=hole_shelf_hole_radius,
+        column_gap=hole_shelf_column_gap,
+        row_gap=hole_shelf_row_gap,
+        front_gap=hole_shelf_front_gap,
+        rear_gap=hole_shelf_rear_gap,
+        side_gap=hole_shelf_side_gap,
+        stagger=hole_shelf_stagger,
+        rear_fillet_radius=hole_shelf_rear_fillet_radius,
+        rounding=hole_shelf_rounding,
+        hanger_tolerance=hanger_tolerance,
+        variant=variant
+    );
+else if (part == 7)
+    slot_shelf(
+        thickness=slot_shelf_thickness,
+        slots=slot_shelf_slots,
+        slot_length=slot_shelf_slot_length,
+        slot_width=slot_shelf_slot_width,
+        slot_rounding=slot_shelf_slot_rounding,
+        gap=slot_shelf_gap,
+        front_gap=slot_shelf_front_gap,
+        rear_gap=slot_shelf_rear_gap,
+        side_gap=slot_shelf_side_gap,
+        rear_fillet_radius=slot_shelf_rear_fillet_radius,
+        rounding=slot_shelf_rounding,
+        hanger_tolerance=hanger_tolerance,
+        variant=variant
     );

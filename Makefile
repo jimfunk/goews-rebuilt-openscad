@@ -89,11 +89,35 @@ HOOKS = $(foreach size,$(HOOK_SIZES), \
 			) \
 		)
 
+PART_SHELF = 5
+SHELF_SIZES = 83.5x30 83.5x60 125.5x30 125.5x60
+SHELVES = $(foreach size,$(SHELF_SIZES), \
+			$(foreach variant,$(VARIANTS), \
+				$(BUILD_DIR)/shelf-$(variant)-$(size).stl \
+			) \
+		)
+
+PART_HOLE_SHELF = 6
+HOLE_SHELF_SIZES = 1x3 1x5 1x8 2x3 2x5 2x8
+HOLE_SHELVES = $(foreach size,$(HOLE_SHELF_SIZES), \
+			$(foreach variant,$(VARIANTS), \
+				$(BUILD_DIR)/hole-shelf-$(variant)-$(size).stl \
+			) \
+		)
+
+PART_SLOT_SHELF = 7
+SLOT_SHELF_SIZES = 10x40x4 10x40x8 20x60x4 20x60x8
+SLOT_SHELVES = $(foreach size,$(SLOT_SHELF_SIZES), \
+			$(foreach variant,$(VARIANTS), \
+				$(BUILD_DIR)/slot-shelf-$(variant)-$(size).stl \
+			) \
+		)
+
 PART_BOLT = 2
 BOLT_LENGTHS= 9 16
 BOLTS = $(foreach length,$(BOLT_LENGTHS),$(BUILD_DIR)/bolt-$(length).stl)
 
-all: tiles grid-tiles hooks bolts
+all: tiles grid-tiles hooks shelves hole-shelves slot-shelves bolts
 .PHONY: all
 
 # Generate all tile models
@@ -107,6 +131,18 @@ grid-tiles: $(GRID_TILES)
 # Generate all hook models
 hooks: $(HOOKS)
 .PHONY: hooks
+
+# Generate all shelf models
+shelves: $(SHELVES)
+.PHONY: shelves
+
+# Generate all hole shelf models
+hole-shelves: $(HOLE_SHELVES)
+.PHONY: hole-shelves
+
+# Generate all slot shelf models
+slot-shelves: $(SLOT_SHELVES)
+.PHONY: slot-shelves
 
 # Generate all bolt models
 bolts: $(BOLTS)
@@ -162,6 +198,50 @@ $(BUILD_DIR)/hook-%.stl: $(MAIN_SCAD) $(BUILD_DIR)
 		-D 'variant=$(VARIANT_NUM)' \
 		-D 'hook_width=$(HOOK_WIDTH)' \
 		-D 'hook_shank_length=$(HOOK_SHANK_LENGTH)'
+
+# Shelf rule
+$(BUILD_DIR)/shelf-%.stl: $(MAIN_SCAD) $(BUILD_DIR)
+	$(eval VARIANT_NAME := $(word 1,$(subst -, ,$*)))
+	$(eval VARIANT_NUM := $(shell echo $(VARIANT_NAME) | awk '{if ($$1 == "original") print 0; else print 1;}'))
+	$(eval SIZE := $(word 2,$(subst -, ,$*)))
+	$(eval WIDTH := $(word 1,$(subst x, ,$(SIZE))))
+	$(eval DEPTH := $(word 2,$(subst x, ,$(SIZE))))
+	$(OPENSCAD) $(OPENSCAD_ARGS) \
+		-o $@ $(MAIN_SCAD) \
+		-D 'part=$(PART_SHELF)' \
+		-D 'variant=$(VARIANT_NUM)' \
+		-D 'shelf_width=$(WIDTH)' \
+		-D 'shelf_depth=$(DEPTH)'
+
+# Hole shelf rule
+$(BUILD_DIR)/hole-shelf-%.stl: $(MAIN_SCAD) $(BUILD_DIR)
+	$(eval VARIANT_NAME := $(word 1,$(subst -, ,$*)))
+	$(eval VARIANT_NUM := $(shell echo $(VARIANT_NAME) | awk '{if ($$1 == "original") print 0; else print 1;}'))
+	$(eval SIZE := $(word 2,$(subst -, ,$*)))
+	$(eval ROWS := $(word 1,$(subst x, ,$(SIZE))))
+	$(eval COLUMNS := $(word 2,$(subst x, ,$(SIZE))))
+	$(OPENSCAD) $(OPENSCAD_ARGS) \
+		-o $@ $(MAIN_SCAD) \
+		-D 'part=$(PART_HOLE_SHELF)' \
+		-D 'variant=$(VARIANT_NUM)' \
+		-D 'hole_shelf_rows=$(ROWS)' \
+		-D 'hole_shelf_columns=$(COLUMNS)'
+
+# Slot shelf rule
+$(BUILD_DIR)/slot-shelf-%.stl: $(MAIN_SCAD) $(BUILD_DIR)
+	$(eval VARIANT_NAME := $(word 1,$(subst -, ,$*)))
+	$(eval VARIANT_NUM := $(shell echo $(VARIANT_NAME) | awk '{if ($$1 == "original") print 0; else print 1;}'))
+	$(eval SIZE := $(word 2,$(subst -, ,$*)))
+	$(eval WIDTH := $(word 1,$(subst x, ,$(SIZE))))
+	$(eval LENGTH := $(word 2,$(subst x, ,$(SIZE))))
+	$(eval SLOTS := $(word 3,$(subst x, ,$(SIZE))))
+	$(OPENSCAD) $(OPENSCAD_ARGS) \
+		-o $@ $(MAIN_SCAD) \
+		-D 'part=$(PART_SLOT_SHELF)' \
+		-D 'variant=$(VARIANT_NUM)' \
+		-D 'slot_shelf_slot_width=$(WIDTH)' \
+		-D 'slot_shelf_slot_length=$(LENGTH)' \
+		-D 'slot_shelf_slots=$(SLOTS)'
 
 # bolt rule
 $(BUILD_DIR)/bolt-%.stl: $(MAIN_SCAD) $(BUILD_DIR)

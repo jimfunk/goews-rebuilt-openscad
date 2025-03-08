@@ -142,7 +142,10 @@ function get_hanger_plate_offset(variant, hanger_tolerance) =
     variant == variant_thicker_cleats ? hanger_offset + hanger_tolerance : hanger_tolerance;
 
 // Get the number of hanger units needed for the given width
-function get_hanger_units_from_width(width) = ceil(width / plate_width);
+function get_hanger_units_from_width(width) =
+    ceil((width + (width > plate_width ? plate_gap : 0)) / (plate_width + plate_gap));
 
 // Get the total hanger plate width for the given width
-function get_hanger_plate_width(width) = ceil(width / plate_width) * plate_width;
+function get_hanger_plate_width(width) =
+    let(units = get_hanger_units_from_width(width))
+        (units * plate_width) + ((units > 0 ? units - 1 : 0) * plate_gap);

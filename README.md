@@ -41,6 +41,10 @@ configurable.
 Racks are a new type of part that can be used for hanging items with wide tops. This is
 quite useful for storing cables, bar clamps, screwdrivers, etc.
 
+### Shelves
+
+Shelves can be generated with any width and depth. There are variants with holes and slots as well.
+
 ### Bolts
 
 Bolts are similar to the original ones. The length and socket width are configurable.
@@ -74,7 +78,6 @@ actually writable by the `goews` user.
 
 PRs are welcome :-)
 
-* Shelves
 * Boxes
 * Cups
 * Gridfinity plates

@@ -30,6 +30,7 @@ import server.bolt
 import server.hook
 import server.tile
 import server.rack
+import server.shelf
 
 
 if __name__ == "__main__":
