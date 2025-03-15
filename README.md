@@ -2,7 +2,9 @@
 
 This is a rebuild of [GOEWS](https://goews.xyz/) in OpenSCAD to allow for easy
 generation and customization of parts. It requires the
-[BOSL2](https://github.com/BelfrySCAD/BOSL2) library.
+[BOSL2](https://github.com/BelfrySCAD/BOSL2) library and
+[Gridfinity Rebuilt in OpenSCAD](https://github.com/kennetek/gridfinity-rebuilt-openscad)
+installed in the library path.
 
 It also introduces a variant with thicker cleats which improves the weight capacity of
 the tiles by 60%.
@@ -26,7 +28,9 @@ plate on a standard drywall-covered wall.
 
 #### Thicker cleats
 
-The thicker cleats variant can hold 60% more weight when used without the threaded bolts. As a side-effect, the tiles actually use about 14% less filament and no longer have sharp edges.
+The thicker cleats variant can hold 60% more weight when used without the threaded
+bolts. As a side-effect, the tiles actually use about 14% less filament and no longer
+have sharp edges.
 
 From testing, the original cleats, without bolts, held at 25lb and failed at 30lb. The
 thicker cleats held at 40lb and failed at 45lb.
@@ -43,7 +47,8 @@ quite useful for storing cables, bar clamps, screwdrivers, etc.
 
 ### Shelves
 
-Shelves can be generated with any width and depth. There are variants with holes and slots as well.
+Shelves can be generated with any width and depth. There are variants with holes,
+slots, and Gridfinity bases as well.
 
 ### Bins
 
@@ -86,7 +91,7 @@ actually writable by the `goews` user.
 
 PRs and suggestions are welcome :-)
 
-* Gridfinity plates
+* Tile generation by width and height
 * Shelf supports
 * Bins with dividers
 * Multi-cups

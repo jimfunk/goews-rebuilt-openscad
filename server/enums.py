@@ -12,6 +12,7 @@ class Part(IntEnum):
     SlotShelf = 7
     Bin = 8
     Cup = 9
+    GridfinityShelf = 10
 
 
 class Variant(IntEnum):

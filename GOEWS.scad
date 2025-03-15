@@ -5,6 +5,7 @@ include <constants.scad>
 use <bin.scad>
 use <bolt.scad>
 use <cup.scad>
+use <gridfinity.scad>
 use <hanger.scad>
 use <hook.scad>
 use <parsers.scad>
@@ -14,7 +15,7 @@ use <tile.scad>
 
 /* [Primary parameters] */
 // Which part to build
-part = 0; // [0: Tile, 1: Hook, 2: Bolt, 3: Rack, 4: Grid Tile, 5: Shelf, 6: Hole shelf, 7: Slot shelf, 8: Bin, 9: Cup]
+part = 0; // [0: Tile, 1: Hook, 2: Bolt, 3: Rack, 4: Grid Tile, 5: Shelf, 6: Hole shelf, 7: Slot shelf, 8: Bin, 9: Cup, 10: Gridfinity shelf]
 
 // Which variant to use
 variant = 0; // [0: Original, 1: Thicker cleats]
@@ -249,6 +250,32 @@ cup_inner_rounding = 0.5;
 cup_outer_rounding = 0.5;
 
 
+/* [Gridfinity shelf parameters] */
+// Number of grid units in the x direction
+gridfinity_shelf_gridx = 2;
+
+// Number of grid units in the y direction
+gridfinity_shelf_gridy = 1;
+
+// Distance between plate and base in mm
+gridfinity_shelf_rear_offset = 4.5;
+
+// Additional base thickness in mm. This improves rigidity but can be 0 to implement a thin baseplate
+gridfinity_shelf_base_thickness = 0;
+
+// Skeletonized. When the base thickness is > 0 this will remove unnecessary material from the base
+gridfinity_shelf_skeletonized = true;
+
+// Add magnet holes. Will be ignored if base thickness is < 4
+gridfinity_shelf_magnet_holes = false;
+
+// Add crush ribs to the magnet holes
+gridfinity_shelf_magnet_hole_crush_ribs = false;
+
+// Add a chamfer to the magnet holes
+gridfinity_shelf_magnet_hole_chamfer = false;
+
+
 /* [Hidden] */
 $fa=0.5;
 $fs=0.5;
@@ -377,6 +404,19 @@ else if (part == 9)
         bottom_thickness=cup_bottom_thickness,
         inner_rounding=cup_inner_rounding,
         outer_rounding=cup_outer_rounding,
+        hanger_tolerance=hanger_tolerance,
+        variant=variant
+    );
+else if (part == 10)
+    gridfinity_shelf(
+        gridx=gridfinity_shelf_gridx,
+        gridy=gridfinity_shelf_gridy,
+        rear_offset=gridfinity_shelf_rear_offset,
+        base_thickness=gridfinity_shelf_base_thickness,
+        skeletonized=gridfinity_shelf_skeletonized,
+        magnet_holes=gridfinity_shelf_magnet_holes,
+        magnet_hole_crush_ribs=gridfinity_shelf_magnet_hole_crush_ribs,
+        magnet_hole_chamfer=gridfinity_shelf_magnet_hole_chamfer,
         hanger_tolerance=hanger_tolerance,
         variant=variant
     );

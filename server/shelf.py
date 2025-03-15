@@ -122,3 +122,38 @@ async def slot_shelf(request: Request, body: SlotShelfDefinition):
         ),
         content_type="model/stl",
     )
+
+
+class GridfinityShelfDefinition(BaseModel):
+    gridx: Annotated[int, Field(gt=0)]
+    gridy: Annotated[int, Field(gt=0)]
+    rear_offset: Annotated[float, Field(gte=0)]
+    base_thickness: Annotated[float, Field(gte=0)]
+    skeletonized: bool
+    magnet_holes: bool
+    magnet_hole_crush_ribs: bool
+    magnet_hole_chamfer: bool
+    variant: Variant
+
+
+@app.post("/api/gridfinity_shelf")
+@validate(json=GridfinityShelfDefinition)
+@openapi.body(GridfinityShelfDefinition, required=True)
+@openapi.response(200, {"model/stl": bytes})
+@openapi.description("Create a GOEWS Gridfinity shelf")
+async def gridfinity_shelf(request: Request, body: GridfinityShelfDefinition):
+    return response.raw(
+        await build(
+            part=Part.GridfinityShelf,
+            variant=body.variant,
+            gridfinity_shelf_gridx=body.gridx,
+            gridfinity_shelf_gridy=body.gridy,
+            gridfinity_shelf_rear_offset=body.rear_offset,
+            gridfinity_shelf_base_thickness=body.base_thickness,
+            gridfinity_shelf_skeletonized=body.skeletonized,
+            gridfinity_shelf_magnet_holes=body.magnet_holes,
+            gridfinity_shelf_magnet_hole_crush_ribs=body.magnet_hole_crush_ribs,
+            gridfinity_shelf_magnet_hole_chamfer=body.magnet_hole_chamfer,
+        ),
+        content_type="model/stl",
+    )
