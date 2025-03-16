@@ -423,6 +423,7 @@ module tile(
     fill_bottom=false,
     fill_left=false,
     fill_right=false,
+    reverse_stagger=false,
     mounting_hole_shank_diameter=4,
     mounting_hole_head_diameter=8,
     mounting_hole_inset_depth=1,
@@ -431,18 +432,21 @@ module tile(
     cut_outside_corners=true,
     chamfer_rear=true,
 ) {
+    stagger_0 = reverse_stagger ? 1 : 0;
+    stagger_1 = reverse_stagger ? 0 : 1;
+
     for (row = [0 : rows - 1]) {
-        offset_x = (row % 2 == 0) ? tile_width / 2 : 0;
+        offset_x = (row % 2 == stagger_0) ? tile_width / 2 : 0;
 
         for (column = [0 : columns - 1]) {
             pos_x = offset_x + column * tile_width;
             pos_y = row * tile_y_offset;
 
             // Determine outer corners and edges
-            left_outside = (column == 0) && (row % 2 == 1);
-            left_inside = ((column == 0) && (row % 2 == 0));
-            right_outside = (column == (columns - 1)) && (row % 2 == 0);
-            right_inside = (column == (columns - 1)) && (row % 2 == 1);
+            left_outside = (column == 0) && (row % 2 == stagger_1);
+            left_inside = ((column == 0) && (row % 2 == stagger_0));
+            right_outside = (column == (columns - 1)) && (row % 2 == stagger_0);
+            right_inside = (column == (columns - 1)) && (row % 2 == stagger_1);
             bottom = row == 0;
             top = row == (rows - 1);
 
@@ -496,7 +500,7 @@ module tile(
 
         if (fill_top && row == (rows - 1)) {
             // Fill in top row
-            even_row = (row + 1) % 2 == 0;
+            even_row = (row + 1) % 2 == stagger_0;
             offset_x = even_row ? tile_width / 2 : tile_width;
 
             for (column = [0 : columns]) {
@@ -518,15 +522,16 @@ module tile(
 
         if (fill_bottom && row == 0) {
             // Fill in bottom row
-            offset_x = ((row + 1) % 2 == 0) ? tile_width / 2 : 0;
+            offset_x = reverse_stagger ? tile_width / -2 : 0;
 
             for (column = [0 : columns]) {
                 pos_x = (offset_x + column * tile_width);
+                echo(pos_x);
                 pos_y = tile_y_offset * (row);
                 translate([pos_x, pos_y, 0])
                     hex_fill_bottom(
-                        crop_left=(column == 0 && !fill_left),
-                        crop_right=(column == columns),
+                        crop_left=(column == 0 && (!fill_left || reverse_stagger)),
+                        crop_right=(column == columns && (!fill_right || !reverse_stagger)),
                         chamfer_rear=chamfer_rear
                     );
             }

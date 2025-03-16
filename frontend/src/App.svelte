@@ -78,6 +78,13 @@
                     description: "Fill the right row edge",
                 },
                 {
+                    field: "reverse_stagger",
+                    name: "Reverse stagger",
+                    type: "boolean",
+                    default: false,
+                    description: "Reverse row stagger. This is useful for allowing tiles with odd numbers of rows to align with tiles with even numbers of rows at the top instead of the bottom",
+                },
+                {
                     field: "mounting_hole_shank_diameter",
                     name: "Mounting hole shank diameter",
                     type: "number",

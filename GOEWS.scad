@@ -42,6 +42,9 @@ tile_fill_left = false;
 // Fill right side
 tile_fill_right = false;
 
+// Reverse row stagger. This is useful for allowing tiles with odd numbers of rows to align with tiles with even numbers of rows at the top instead of the bottom
+tile_reverse_stagger = false;
+
 // Mounting hole shank diameter
 tile_mounting_hole_shank_diameter = 4;
 
@@ -291,6 +294,7 @@ if (part == 0)
         fill_bottom=tile_fill_bottom,
         fill_left=tile_fill_left,
         fill_right=tile_fill_right,
+        reverse_stagger=tile_reverse_stagger,
         mounting_hole_shank_diameter=tile_mounting_hole_shank_diameter,
         mounting_hole_head_diameter=tile_mounting_hole_head_diameter,
         mounting_hole_inset_depth=tile_mounting_hole_inset_depth,
