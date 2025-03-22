@@ -4,7 +4,7 @@ include <constants.scad>
 
 
 // The hanger part. This is the profile that fits inside the tile
-module hanger(variant=variant_original, hanger_tolerance) {
+module hanger(variant=variant_original, hanger_tolerance, extended_bottom=false) {
     midpoint = hanger_thickness / 2;
     hanger_plate_offset = get_hanger_plate_offset(variant, hanger_tolerance=hanger_tolerance);
     hanger_total_thickness = hanger_thickness + hanger_plate_offset;
@@ -26,6 +26,7 @@ module hanger(variant=variant_original, hanger_tolerance) {
             linear_extrude(height=hanger_height)
                 translate([hanger_thickness / 2, hanger_thickness, 0])
                     square(size=[hanger_width - hanger_thickness, hanger_plate_offset]);
+
         }
 
         // Rear chamfer
@@ -39,6 +40,15 @@ module hanger(variant=variant_original, hanger_tolerance) {
             rear_cutoff = hanger_total_thickness - tile_thickness;
             linear_extrude(height = hanger_height)
                 square([hanger_width, rear_cutoff]);
+        }
+
+        // Bottom chamfer (only if thicker cleats and the hanger is above the build plate)
+        if (extended_bottom && variant == variant_thicker_cleats) {
+            translate([0, hanger_total_thickness, 0])
+                wedge(
+                    [hanger_width, hanger_plate_offset + midpoint, midpoint],
+                    anchor=DOWN+LEFT+BACK
+                );
         }
 
         // Cutout
@@ -59,9 +69,14 @@ module hanger_plate_unit(
     hanger_plate_offset = get_hanger_plate_offset(variant, hanger_tolerance);
     hanger_total_thickness = hanger_thickness + hanger_plate_offset;
     total_plate_height = plate_height + extend_bottom;
+    extended_bottom = extend_bottom > 0 ? true : false;
 
     translate([(plate_width - hanger_width) / 2, 0, extend_bottom]) {
-        hanger(variant=variant, hanger_tolerance=hanger_tolerance);
+        hanger(
+            variant=variant,
+            hanger_tolerance=hanger_tolerance,
+            extended_bottom=extend_bottom
+        );
     }
 
     // Main plate
