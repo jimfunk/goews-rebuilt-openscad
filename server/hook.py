@@ -19,6 +19,7 @@ class HookDefinition(BaseModel):
     shank_thickness: Annotated[float, Field(gt=0)]
     post_height: float
     post_thickness: float
+    lip_thickness: float
     rounding: float
     variant: Variant
 
@@ -40,6 +41,7 @@ async def hook(request: Request, body: HookDefinition):
             hook_shank_thickness=body.shank_thickness,
             hook_post_height=body.post_height,
             hook_post_thickness=body.post_thickness,
+            hook_lip_thickness=body.lip_thickness,
             hook_rounding=body.rounding,
         ),
         content_type="model/stl",

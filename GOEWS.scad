@@ -85,6 +85,9 @@ hook_post_thickness = 6;
 // Hook rounding on the outer corners in mm
 hook_rounding = 0.5;
 
+// Add a lip on top of the hook post. Set to 0 to disable
+hook_lip_thickness = 0;
+
 /* [Rack parameters] */
 // Number of slots in the rack
 rack_slots = 7;
@@ -311,6 +314,7 @@ else if (part == 1)
         shank_thickness=hook_shank_thickness,
         post_height=hook_post_height,
         post_thickness=hook_post_thickness,
+        lip_thickness=hook_lip_thickness,
         hanger_tolerance=hanger_tolerance,
         rounding=hook_rounding
     );

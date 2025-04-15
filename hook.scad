@@ -10,6 +10,7 @@ module hook(
     shank_thickness=8,
     post_height=18,
     post_thickness=6,
+    lip_thickness=2,
     hooks=1,
     gap=10,
     rounding=0.5,
@@ -56,6 +57,13 @@ module hook(
                                     BACK
                                 ]
                             );
+                        if (lip_thickness) {
+                            translate([width / 2, shank_length, post_height - lip_thickness - rounding])
+                                difference() {
+                                    xcyl(width - rounding * 2, r=lip_thickness);
+                                    cube(size=[width, lip_thickness, lip_thickness * 2], anchor=FRONT);
+                                }
+                        }
                     } else {
                         // Shank only
                         cuboid(

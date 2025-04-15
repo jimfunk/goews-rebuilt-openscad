@@ -82,7 +82,8 @@
                     name: "Reverse stagger",
                     type: "boolean",
                     default: false,
-                    description: "Reverse row stagger. This is useful for allowing tiles with odd numbers of rows to align with tiles with even numbers of rows at the top instead of the bottom",
+                    description:
+                        "Reverse row stagger. This is useful for allowing tiles with odd numbers of rows to align with tiles with even numbers of rows at the top instead of the bottom",
                 },
                 {
                     field: "mounting_hole_shank_diameter",
@@ -258,6 +259,14 @@
                     default: 6.0,
                     description:
                         "Thickness of the post in mm. If 0 the post will be omitted",
+                },
+                {
+                    field: "lip_thickness",
+                    name: "Lip thickness",
+                    type: "number",
+                    default: 0.0,
+                    description:
+                        "Radius of lip to add at the top of the post. If 0 this will be omittted",
                 },
                 {
                     field: "rounding",
@@ -590,21 +599,24 @@
                     name: "Base thickness",
                     type: "number",
                     default: 0,
-                    description: "Additional base thickness in mm. This improves rigidity but can be 0 to implement a thin baseplate",
+                    description:
+                        "Additional base thickness in mm. This improves rigidity but can be 0 to implement a thin baseplate",
                 },
                 {
                     field: "skeletonized",
                     name: "Skeletonized",
                     type: "boolean",
                     default: true,
-                    description: "When the base thickness is > 0 this will remove unnecessary material from the base",
+                    description:
+                        "When the base thickness is > 0 this will remove unnecessary material from the base",
                 },
                 {
                     field: "magnet_holes",
                     name: "Magnet holes",
                     type: "boolean",
                     default: false,
-                    description: "Add magnet holes. Will be ignored if base thickness is < 4",
+                    description:
+                        "Add magnet holes. Will be ignored if base thickness is < 4",
                 },
                 {
                     field: "magnet_hole_crush_ribs",
@@ -722,7 +734,7 @@
                     field: "inner_rounding",
                     name: "Inner rounding",
                     type: "number",
-                    default: .5,
+                    default: 0.5,
                     description: "Rounding of the inner edges in mm",
                 },
                 {
