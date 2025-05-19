@@ -12,8 +12,8 @@ app = Sanic.get_app()
 
 
 class BoltDefinition(BaseModel):
-    length: Annotated[float, Field(gt=0)]
-    socket_width: Annotated[float, Field(gt=0)]
+    length: Annotated[float, Field(gt=0)] = 9
+    socket_width: Annotated[float, Field(gt=0)] = 8.4
 
 
 @app.post("/api/bolt")

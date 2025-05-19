@@ -13,6 +13,8 @@ class Part(IntEnum):
     Bin = 8
     Cup = 9
     GridfinityShelf = 10
+    HangerMount = 11
+    CableClip = 12
 
 
 class Variant(IntEnum):

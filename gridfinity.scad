@@ -53,7 +53,7 @@ module gridfinity_shelf(
 ) {
     hanger_plate_offset = get_hanger_plate_offset(variant, hanger_tolerance);
     hanger_total_thickness = hanger_thickness + hanger_plate_offset;
-    plate_total_thickness = plate_thickness + hanger_total_thickness;
+    plate_total_thickness = default_plate_thickness + hanger_total_thickness;
 
     width = base_width * gridx;
     // With the standard width of 42 the plate width is slightly smaller so we need to

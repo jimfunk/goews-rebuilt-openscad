@@ -4,6 +4,7 @@ include <BOSL2/threading.scad>
 include <constants.scad>
 use <bin.scad>
 use <bolt.scad>
+use <cableclip.scad>
 use <cup.scad>
 use <gridfinity.scad>
 use <hanger.scad>
@@ -15,7 +16,7 @@ use <tile.scad>
 
 /* [Primary parameters] */
 // Which part to build
-part = 0; // [0: Tile, 1: Hook, 2: Bolt, 3: Rack, 4: Grid Tile, 5: Shelf, 6: Hole shelf, 7: Slot shelf, 8: Bin, 9: Cup, 10: Gridfinity shelf]
+part = 0; // [0: Tile, 1: Hook, 2: Bolt, 3: Rack, 4: Grid Tile, 5: Shelf, 6: Hole shelf, 7: Slot shelf, 8: Bin, 9: Cup, 10: Gridfinity shelf, 11: Hanger mount, 12: Cable clip]
 
 // Which variant to use
 variant = 0; // [0: Original, 1: Thicker cleats]
@@ -281,6 +282,50 @@ gridfinity_shelf_magnet_hole_crush_ribs = false;
 // Add a chamfer to the magnet holes
 gridfinity_shelf_magnet_hole_chamfer = false;
 
+/* [Hanger mount parameters] */
+// Each entry is a 5-tuple of (hole type, x offset from left, y offset from top, diameter, depth), eg: [2, 20.75, 17.5, 5, 8] for an M5 hole in the center of the bottom part with a hex nut recess
+hanger_mount_holes = "[[2, 20.75, 17.5, 4, 8]]";
+
+// Thickness of the hanger mount plate. You may have to manually adjust this based on the mounting hardware and the position of the holes
+hanger_mount_plate_thickness = 8;
+
+// Minimum width of the plate. If more than a standard plate width, it will be extended on the right side with more plate units
+hanger_mount_minimum_width = 0;
+
+// Minimum height of the plate. If more than a standard plate height, it will be extended downwards
+hanger_mount_minimum_height = 0;
+
+// Include a notch for the bolt. This allows for flush mounting
+hanger_mount_bolt_notch = true;
+
+/* [Cable clip parameters] */
+// Orientation of the clip
+cable_clip_orientation = cable_clip_orientation_vertical;
+
+// Diameter of the cable in mm
+cable_clip_cable_diameter = 5;
+
+// Width of the clip in mm
+cable_clip_width = 6;
+
+// Height of the clip in mm, not including the base thickness
+cable_clip_height = 8;
+
+// Thickness of the clip in mm
+cable_clip_thickness = 3;
+
+// Thickness of the lip in mm
+cable_clip_lip_thickness = 2;
+
+// Rounding of the clip in mm
+cable_clip_rounding=0.5;
+
+// Number of clips to make
+cable_clip_clips = 1;
+
+// Gap between clips in mm
+cable_clip_gap = 10;
+
 
 /* [Hidden] */
 $fa=0.5;
@@ -425,6 +470,30 @@ else if (part == 10)
         magnet_holes=gridfinity_shelf_magnet_holes,
         magnet_hole_crush_ribs=gridfinity_shelf_magnet_hole_crush_ribs,
         magnet_hole_chamfer=gridfinity_shelf_magnet_hole_chamfer,
+        hanger_tolerance=hanger_tolerance,
+        variant=variant
+    );
+else if (part == 11)
+    hanger_mount(
+        holes=parse_vector_list(hanger_mount_holes),
+        plate_thickness=hanger_mount_plate_thickness,
+        minimum_width=hanger_mount_minimum_width,
+        minimum_height=hanger_mount_minimum_height,
+        bolt_notch=hanger_mount_bolt_notch,
+        hanger_tolerance=hanger_tolerance,
+        variant=variant
+    );
+else if (part == 12)
+    cableclip(
+        orientation=cable_clip_orientation,
+        cable_diameter=cable_clip_cable_diameter,
+        width=cable_clip_width,
+        height=cable_clip_height,
+        thickness=cable_clip_thickness,
+        lip_thickness=cable_clip_lip_thickness,
+        rounding=cable_clip_rounding,
+        clips=cable_clip_clips,
+        gap=cable_clip_gap,
         hanger_tolerance=hanger_tolerance,
         variant=variant
     );

@@ -12,19 +12,19 @@ app = Sanic.get_app()
 
 
 class TileDefinition(BaseModel):
-    columns: Annotated[int, Field(gt=0)]
-    rows: Annotated[int, Field(gt=0)]
-    fill_top: bool
-    fill_bottom: bool
-    fill_left: bool
-    fill_right: bool
-    reverse_stagger: bool
-    mounting_hole_shank_diameter: Annotated[float, Field(gt=0)]
-    mounting_hole_head_diameter: Annotated[float, Field(gt=0)]
-    mounting_hole_inset_depth: Annotated[float, Field(gt=0)]
-    mounting_hole_countersink_depth: Annotated[float, Field(gte=0)]
-    skip_list: list[list[int, int]]
-    variant: Variant
+    columns: Annotated[int, Field(gt=0)] = 4
+    rows: Annotated[int, Field(gt=0)] = 4
+    fill_top: bool = False
+    fill_bottom: bool = False
+    fill_left: bool = False
+    fill_right: bool = False
+    reverse_stagger: bool = False
+    mounting_hole_shank_diameter: Annotated[float, Field(gt=0)] = 4
+    mounting_hole_head_diameter: Annotated[float, Field(gt=0)] = 8
+    mounting_hole_inset_depth: Annotated[float, Field(gt=0)] = 1
+    mounting_hole_countersink_depth: Annotated[float, Field(gte=0)] = 2
+    skip_list: list[list[int, int]] = []
+    variant: Variant = Variant.Original
 
     @field_validator('skip_list', mode="after")
     @classmethod
@@ -68,14 +68,14 @@ async def tile(request: Request, body: TileDefinition):
 
 
 class GridTileDefinition(BaseModel):
-    columns: Annotated[int, Field(gt=0)]
-    rows: Annotated[int, Field(gt=0)]
-    mounting_hole_shank_diameter: Annotated[float, Field(gt=0)]
-    mounting_hole_head_diameter: Annotated[float, Field(gt=0)]
-    mounting_hole_inset_depth: Annotated[float, Field(gt=0)]
-    mounting_hole_countersink_depth: Annotated[float, Field(gte=0)]
-    skip_list: list[list[int, int]]
-    variant: Variant
+    columns: Annotated[int, Field(gt=0)] = 4
+    rows: Annotated[int, Field(gt=0)] = 4
+    mounting_hole_shank_diameter: Annotated[float, Field(gt=0)] = 4
+    mounting_hole_head_diameter: Annotated[float, Field(gt=0)] = 8
+    mounting_hole_inset_depth: Annotated[float, Field(gt=0)] = 1
+    mounting_hole_countersink_depth: Annotated[float, Field(gte=0)] = 2
+    skip_list: list[list[int, int]] = []
+    variant: Variant = Variant.Original
 
     @field_validator('skip_list', mode="after")
     @classmethod

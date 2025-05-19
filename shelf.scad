@@ -16,7 +16,7 @@ module shelf(
 ) {
     hanger_plate_offset = get_hanger_plate_offset(variant, hanger_tolerance);
     hanger_total_thickness = hanger_thickness + hanger_plate_offset;
-    plate_total_thickness = plate_thickness + hanger_total_thickness;
+    plate_total_thickness = default_plate_thickness + hanger_total_thickness;
 
     x_offset = get_hanger_plate_width(width) / 2;
     y_offset = plate_total_thickness;
@@ -63,7 +63,7 @@ module hole_shelf(
 ) {
     hanger_plate_offset = get_hanger_plate_offset(variant, hanger_tolerance);
     hanger_total_thickness = hanger_thickness + hanger_plate_offset;
-    plate_total_thickness = plate_thickness + hanger_total_thickness;
+    plate_total_thickness = default_plate_thickness + hanger_total_thickness;
 
     offset_width = stagger ? column_gap / 2 + hole_radius : 0;
     width = (side_gap * 2) + (columns * hole_radius * 2) + ((columns - 1) * column_gap) + offset_width;
@@ -131,7 +131,7 @@ module slot_shelf(
 ) {
     hanger_plate_offset = get_hanger_plate_offset(variant, hanger_tolerance);
     hanger_total_thickness = hanger_thickness + hanger_plate_offset;
-    plate_total_thickness = plate_thickness + hanger_total_thickness;
+    plate_total_thickness = default_plate_thickness + hanger_total_thickness;
 
     width = (side_gap * 2) + (slots * slot_width) + ((slots - 1) * gap);
     depth = front_gap + rear_gap + slot_length;

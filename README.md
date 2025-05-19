@@ -58,6 +58,19 @@ Bins are simple square bins with customizable width, depth, and height.
 
 Cups are simple cups with customizable inner diameter and height.
 
+### Hanger mounts
+
+Hanger mounts allow you to mount almost anything to GOEWS.
+
+Holes can be placed at any position on the plate, which can be made thicker to account
+for the hardware. The holes can be made for heat-set inserts, self-tapping screws, hex
+nuts or bolts, sqare nuts, socket and button cap screws, and flat countersink screws.
+
+### Cable clips
+
+Cable clips are useful for organizing cables. Plates with multiple clips are supported
+and clips can be made to hold single or multiple cables.
+
 ### Bolts
 
 Bolts are similar to the original ones. The length and socket width are configurable.
@@ -95,3 +108,5 @@ PRs and suggestions are welcome :-)
 * Shelf supports
 * Bins with dividers
 * Multi-cups
+* Optional multiple vertical hangers for taller items
+* More socket and flange options for bolts

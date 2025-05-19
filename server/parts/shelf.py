@@ -12,12 +12,13 @@ app = Sanic.get_app()
 
 
 class ShelfDefinition(BaseModel):
-    width: Annotated[float, Field(gt=0)]
-    depth: Annotated[float, Field(gt=0)]
-    thickness: Annotated[float, Field(gt=0)]
-    rear_fillet_radius: Annotated[float, Field(gte=0)]
-    rounding: Annotated[float, Field(gte=0)]
-    variant: Variant
+    width: Annotated[float, Field(gt=0)] = 83.5
+    depth: Annotated[float, Field(gt=0)] = 30
+    thickness: Annotated[float, Field(gt=0)] = 4
+    rear_fillet_radius: Annotated[float, Field(gte=0)] = 1
+    rounding: Annotated[float, Field(gte=0)] = 0.5
+    hanger_tolerance: Annotated[float, Field(gt=0)] = 0.15
+    variant: Variant = Variant.Original
 
 
 @app.post("/api/shelf")
@@ -29,6 +30,7 @@ async def shelf(request: Request, body: ShelfDefinition):
     return response.raw(
         await build(
             part=Part.Shelf,
+            hanger_tolerance=body.hanger_tolerance,
             variant=body.variant,
             shelf_width=body.width,
             shelf_depth=body.depth,
@@ -41,19 +43,20 @@ async def shelf(request: Request, body: ShelfDefinition):
 
 
 class HoleShelfDefinition(BaseModel):
-    columns: Annotated[int, Field(gt=0)]
-    rows: Annotated[int, Field(gt=0)]
-    thickness: Annotated[float, Field(gt=0)]
-    hole_radius: Annotated[float, Field(gt=0)]
-    column_gap: Annotated[float, Field(gt=0)]
-    row_gap: Annotated[float, Field(gt=0)]
-    front_gap: Annotated[float, Field(gt=0)]
-    rear_gap: Annotated[float, Field(gt=0)]
-    side_gap: Annotated[float, Field(gt=0)]
-    stagger: bool
-    rear_fillet_radius: Annotated[float, Field(gte=0)]
-    rounding: Annotated[float, Field(gte=0)]
-    variant: Variant
+    columns: Annotated[int, Field(gt=0)] = 3
+    rows: Annotated[int, Field(gt=0)] = 1
+    thickness: Annotated[float, Field(gt=0)] = 4
+    hole_radius: Annotated[float, Field(gt=0)] = 3.5
+    column_gap: Annotated[float, Field(gt=0)] = 15
+    row_gap: Annotated[float, Field(gt=0)] = 15
+    front_gap: Annotated[float, Field(gt=0)] = 15
+    rear_gap: Annotated[float, Field(gt=0)] = 15
+    side_gap: Annotated[float, Field(gt=0)] = 15
+    stagger: bool = False
+    rear_fillet_radius: Annotated[float, Field(gte=0)] = 1
+    rounding: Annotated[float, Field(gte=0)] = 0.5
+    hanger_tolerance: Annotated[float, Field(gt=0)] = 0.15
+    variant: Variant = Variant.Original
 
 
 @app.post("/api/hole_shelf")
@@ -65,6 +68,7 @@ async def hole_shelf(request: Request, body: HoleShelfDefinition):
     return response.raw(
         await build(
             part=Part.HoleShelf,
+            hanger_tolerance=body.hanger_tolerance,
             variant=body.variant,
             hole_shelf_columns=body.columns,
             hole_shelf_rows=body.rows,
@@ -84,18 +88,19 @@ async def hole_shelf(request: Request, body: HoleShelfDefinition):
 
 
 class SlotShelfDefinition(BaseModel):
-    slots: Annotated[int, Field(gt=0)]
-    thickness: Annotated[float, Field(gt=0)]
-    slot_length: Annotated[float, Field(gt=0)]
-    slot_width: Annotated[float, Field(gt=0)]
-    slot_rounding: Annotated[float, Field(gte=0)]
-    gap: Annotated[float, Field(gt=0)]
-    front_gap: Annotated[float, Field(gt=0)]
-    rear_gap: Annotated[float, Field(gt=0)]
-    side_gap: Annotated[float, Field(gt=0)]
-    rear_fillet_radius: Annotated[float, Field(gte=0)]
-    rounding: Annotated[float, Field(gte=0)]
-    variant: Variant
+    slots: Annotated[int, Field(gt=0)] = 4
+    thickness: Annotated[float, Field(gt=0)] = 4
+    slot_length: Annotated[float, Field(gt=0)] = 40
+    slot_width: Annotated[float, Field(gt=0)] = 10
+    slot_rounding: Annotated[float, Field(gte=0)] = 1
+    gap: Annotated[float, Field(gt=0)] = 10
+    front_gap: Annotated[float, Field(gt=0)] = 5
+    rear_gap: Annotated[float, Field(gt=0)] = 10
+    side_gap: Annotated[float, Field(gt=0)] = 5
+    rear_fillet_radius: Annotated[float, Field(gte=0)] = 1
+    rounding: Annotated[float, Field(gte=0)] = 0.5
+    hanger_tolerance: Annotated[float, Field(gt=0)] = 0.15
+    variant: Variant = Variant.Original
 
 
 @app.post("/api/slot_shelf")
@@ -107,6 +112,7 @@ async def slot_shelf(request: Request, body: SlotShelfDefinition):
     return response.raw(
         await build(
             part=Part.SlotShelf,
+            hanger_tolerance=body.hanger_tolerance,
             variant=body.variant,
             slot_shelf_slots=body.slots,
             slot_shelf_thickness=body.thickness,
@@ -125,15 +131,16 @@ async def slot_shelf(request: Request, body: SlotShelfDefinition):
 
 
 class GridfinityShelfDefinition(BaseModel):
-    gridx: Annotated[int, Field(gt=0)]
-    gridy: Annotated[int, Field(gt=0)]
-    rear_offset: Annotated[float, Field(gte=0)]
-    base_thickness: Annotated[float, Field(gte=0)]
-    skeletonized: bool
-    magnet_holes: bool
-    magnet_hole_crush_ribs: bool
-    magnet_hole_chamfer: bool
-    variant: Variant
+    gridx: Annotated[int, Field(gt=0)] = 2
+    gridy: Annotated[int, Field(gt=0)] = 1
+    rear_offset: Annotated[float, Field(gte=0)] = 4.5
+    base_thickness: Annotated[float, Field(gte=0)] = 0
+    skeletonized: bool = True
+    magnet_holes: bool = False
+    magnet_hole_crush_ribs: bool = False
+    magnet_hole_chamfer: bool = False
+    hanger_tolerance: Annotated[float, Field(gt=0)] = 0.15
+    variant: Variant = Variant.Original
 
 
 @app.post("/api/gridfinity_shelf")
@@ -145,6 +152,7 @@ async def gridfinity_shelf(request: Request, body: GridfinityShelfDefinition):
     return response.raw(
         await build(
             part=Part.GridfinityShelf,
+            hanger_tolerance=body.hanger_tolerance,
             variant=body.variant,
             gridfinity_shelf_gridx=body.gridx,
             gridfinity_shelf_gridy=body.gridy,

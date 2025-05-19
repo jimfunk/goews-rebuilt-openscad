@@ -17,7 +17,7 @@ module cup(
 ) {
     hanger_plate_offset = get_hanger_plate_offset(variant, hanger_tolerance);
     hanger_total_thickness = hanger_thickness + hanger_plate_offset;
-    plate_total_thickness = plate_thickness + hanger_total_thickness;
+    plate_total_thickness = default_plate_thickness + hanger_total_thickness;
 
     outer_diameter = inner_diameter + 2 * wall_thickness;
     rear_width = outer_diameter / 1.5;

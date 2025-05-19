@@ -12,16 +12,17 @@ app = Sanic.get_app()
 
 
 class HookDefinition(BaseModel):
-    hooks: Annotated[int, Field(gt=0)]
-    width: Annotated[float, Field(gt=0)]
-    gap: Annotated[float, Field(gt=0)]
-    shank_length: Annotated[float, Field(gt=0)]
-    shank_thickness: Annotated[float, Field(gt=0)]
-    post_height: float
-    post_thickness: float
-    lip_thickness: float
-    rounding: float
-    variant: Variant
+    hooks: Annotated[int, Field(gt=0)] = 1
+    width: Annotated[float, Field(gt=0)] = 10
+    gap: Annotated[float, Field(gt=0)] = 10
+    shank_length: Annotated[float, Field(gt=0)] = 10
+    shank_thickness: Annotated[float, Field(gt=0)] = 8
+    post_height: float = 18
+    post_thickness: float = 6
+    lip_thickness: float = 0
+    rounding: float = 0.5
+    hanger_tolerance: Annotated[float, Field(gt=0)] = 0.15
+    variant: Variant = Variant.Original
 
 
 @app.post("/api/hook")
@@ -33,6 +34,7 @@ async def hook(request: Request, body: HookDefinition):
     return response.raw(
         await build(
             part=Part.Hook,
+            hanger_tolerance=body.hanger_tolerance,
             variant=body.variant,
             hooks=body.hooks,
             hook_width=body.width,

@@ -3,6 +3,7 @@
     import { onMount } from "svelte";
     import STLViewer from "./STLViewer.svelte";
     import BooleanParameter from "./parameters/BooleanParameter.svelte";
+    import MountHoleListParameter from "./parameters/MountHoleListParameter.svelte";
     import NumberParameter from "./parameters/NumberParameter.svelte";
     import SelectParameter from "./parameters/SelectParameter.svelte";
     import SkipListParameter from "./parameters/SkipListParameter.svelte";
@@ -27,6 +28,15 @@
             1: "Thicker cleats",
         },
         description: "Tile variant",
+    };
+
+    const hangerToleranceParameter = {
+        field: "hanger_tolerance",
+        name: "Hanger tolerance",
+        type: "number",
+        default: 0.15,
+        description:
+            "Distance added between plate and hanger. Decrease for a tighter fit, increase for an easier fit. A higher tolerance may require the use of bolts.",
     };
 
     const partDescriptions = {
@@ -124,6 +134,18 @@
                 },
                 variantParameter,
             ],
+            getFilenameSegments: (skipParams = []) => {
+                var filenameSegments = [];
+                filenameSegments.push(`${parameters.columns}x${parameters.rows}`);
+                if (parameters.skip_list.length > 0) {
+                    filenameSegments.push(`skip-${parameters.skip_list.join("_")}`);
+                }
+                skipParams.push("columns");
+                skipParams.push("rows");
+                skipParams.push("skip_list");
+                filenameSegments.push(...getFilenameSegments(skipParams));
+                return filenameSegments;
+            },
         },
         grid_tile: {
             name: "Grid tile",
@@ -182,6 +204,14 @@
                 },
                 variantParameter,
             ],
+            getFilenameSegments: (skipParams = []) => {
+                var filenameSegments = [];
+                filenameSegments.push(`${parameters.columns}x${parameters.rows}`);
+                skipParams.push("columns");
+                skipParams.push("rows");
+                filenameSegments.push(...getFilenameSegments(skipParams));
+                return filenameSegments;
+            },
         },
         bolt: {
             name: "Bolt",
@@ -203,6 +233,13 @@
                     description: "Width of the socket in mm",
                 },
             ],
+            getFilenameSegments: (skipParams = []) => {
+                var filenameSegments = [];
+                filenameSegments.push(`${parameters.length}`);
+                skipParams.push("length");
+                filenameSegments.push(...getFilenameSegments(skipParams));
+                return filenameSegments;
+            },
         },
         hook: {
             name: "Hook",
@@ -276,6 +313,7 @@
                     description: "Rounding of the hook outer corners in mm",
                 },
                 variantParameter,
+                hangerToleranceParameter,
             ],
         },
         rack: {
@@ -347,6 +385,7 @@
                     description: "Rounding of the hook outer corners in mm",
                 },
                 variantParameter,
+                hangerToleranceParameter,
             ],
         },
         shelf: {
@@ -389,6 +428,7 @@
                     description: "Rounding of the front edges in mm",
                 },
                 variantParameter,
+                hangerToleranceParameter,
             ],
         },
         hole_shelf: {
@@ -483,6 +523,7 @@
                     description: "Rounding of the front edges in mm",
                 },
                 variantParameter,
+                hangerToleranceParameter,
             ],
         },
         slot_shelf: {
@@ -567,6 +608,7 @@
                     description: "Rounding of the front edges in mm",
                 },
                 variantParameter,
+                hangerToleranceParameter,
             ],
         },
         gridfinity_shelf: {
@@ -633,6 +675,7 @@
                     description: "Add a chamfer to the magnet holes",
                 },
                 variantParameter,
+                hangerToleranceParameter,
             ],
         },
         bin: {
@@ -696,6 +739,7 @@
                     description: "Rounding of the outer edges in mm",
                 },
                 variantParameter,
+                hangerToleranceParameter,
             ],
         },
         cup: {
@@ -745,6 +789,155 @@
                     description: "Rounding of the outer edges in mm",
                 },
                 variantParameter,
+                hangerToleranceParameter,
+            ],
+        },
+        hanger_mount: {
+            name: "Hanger mount",
+            URL: "/api/mount",
+            parameters: [
+                {
+                    field: "holes",
+                    name: "Holes",
+                    type: "mount_hole_list",
+                    default: [],
+                    description: "Holes to make in the plate",
+                },
+                {
+                    field: "plate_thickness",
+                    name: "Plate thickness",
+                    type: "number",
+                    default: 3,
+                    description:
+                        "Thickness of plate in mm. Depending on here the holes are located this may have to be thicker than the default to accomodate the hardware",
+                },
+                {
+                    field: "minimum_width",
+                    name: "Minimum width",
+                    type: "number",
+                    default: 0,
+                    description:
+                        "Minimum width of plate in mm. This can be used to increase the number of hangers",
+                },
+                {
+                    field: "minimum_height",
+                    name: "Minimum height",
+                    type: "number",
+                    default: 0,
+                    description:
+                        "Minimum height of plate in mm. When grater than the normal plate height, the bottom will be extended so that the hangers are at the top",
+                },
+                {
+                    field: "bolt_notch",
+                    name: "Bolt notch",
+                    type: "boolean",
+                    default: true,
+                    description:
+                        "If true and the plate thickness is greater than the default of 3, this adds a notch for the bolt so that it can be used without interfering with the item bing attached",
+                },
+                variantParameter,
+                hangerToleranceParameter,
+            ],
+            getFilenameSegments: (skipParams = []) => {
+                var filenameSegments = [];
+                var holeDescriptions = [];
+                for (var hole of parameters.holes) {
+                    var holeType = "hole";
+                    if (hole.hole_type === 1) {
+                        holeType = "round";
+                    } else if (hole.hole_type === 2) {
+                        holeType = "hex";
+                    } else if (hole.hole_type === 3) {
+                        holeType = "square";
+                    } else if (hole.hole_type === 4) {
+                        holeType = "socket_head";
+                    } else if (hole.hole_type === 5) {
+                        holeType = "button_head";
+                    } else if (hole.hole_type === 6) {
+                        holeType = "flat_head";
+                    }
+                    holeDescriptions.push(`${holeType},${hole.x_offset},${hole.y_offset},${hole.diameter},${hole.depth}`);
+                }
+                filenameSegments.push(`holes-${holeDescriptions.join("_")}`);
+                skipParams.push("holes");
+                filenameSegments.push(...getFilenameSegments(skipParams));
+                return filenameSegments;
+            },
+        },
+        cable_clip: {
+            name: "Cable clip",
+            URL: "/api/cableclip",
+            parameters: [
+                {
+                    field: "orientation",
+                    name: "Orientation",
+                    type: "select",
+                    default: 1,
+                    options: {
+                        1: "Vertical",
+                        2: "Horizontal left",
+                        3: "Horizontal right",
+                    },
+                    description: "Clip orientation",
+                },
+                {
+                    field: "clips",
+                    name: "Clips",
+                    type: "number",
+                    default: 1,
+                    description: "Number of clips to generate",
+                },
+                {
+                    field: "cable_diameter",
+                    name: "Cable diameter",
+                    type: "number",
+                    default: 5,
+                    description: "Diameter of the cable in mm. 5 is good for CAT-5/6. 3.5 is good for USB and low power DC. 8 is good for IEC AC power cables",
+                },
+                {
+                    field: "width",
+                    name: "Width",
+                    type: "number",
+                    default: 6,
+                    description: "Width of clip in mm",
+                },
+                {
+                    field: "height",
+                    name: "Height",
+                    type: "number",
+                    default: 8,
+                    description: "Height of the clip in mm, not including the base thickness",
+                },
+                {
+                    field: "thickness",
+                    name: "Thickness",
+                    type: "number",
+                    default: 3,
+                    description: "Thickness of the clip in mm",
+                },
+                {
+                    field: "gap",
+                    name: "Gap",
+                    type: "number",
+                    default: 10,
+                    description: "Gap between clips in mm",
+                },
+                {
+                    field: "lip_thickness",
+                    name: "Lip thickness",
+                    type: "number",
+                    default: 2,
+                    description: "Thickness of the lip in mm",
+                },
+                {
+                    field: "rounding",
+                    name: "Rounding",
+                    type: "number",
+                    default: 0.5,
+                    description: "Rounding of the clip in mm",
+                },
+                variantParameter,
+                hangerToleranceParameter,
             ],
         },
     };
@@ -827,26 +1020,56 @@
         if (!stlBlob) return;
         const a = document.createElement("a");
         const url = URL.createObjectURL(stlBlob);
-        const part = partDescriptions[selectedPartType];
-        let filenameSegments = [part.name.toLowerCase()];
-
-        part.parameters.forEach((param) => {
-            if (param.field === "variant") {
-                const variantNames = ["original", "thicker_cleats"];
-                filenameSegments.push(`${variantNames[parameters.variant]}`);
-            } else {
-                filenameSegments.push(
-                    `${param.name.toLowerCase()}_${parameters[param.field]}`,
-                );
-            }
-        });
 
         a.href = url;
-        a.download = `${filenameSegments.join("_")}.stl`;
+        a.download = generateFilename();
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+    }
+
+    function generateFilename() {
+        const partDef = partDescriptions[selectedPartType];
+        const baseName = partDef.name.toLowerCase().replace(/\s+/g, "-");
+        var skipParams = ["variant"];
+        var filenameSegments = [baseName];
+
+        if (partDef.parameters.find(p => p.field === "variant")) {
+            if (parameters.variant === 1) {
+                filenameSegments.push("thicker-cleats");
+            }
+        }
+
+        if (partDef.hasOwnProperty("getFilenameSegments"))  {
+            console.log("has getFilenameSegments");
+            filenameSegments.push(...partDef.getFilenameSegments(skipParams));
+        } else {
+            console.log("has no getFilenameSegments");
+            filenameSegments.push(...getFilenameSegments(skipParams));
+        }
+        return filenameSegments.join("_") + ".stl";
+    }
+
+    function getFilenameSegments(skipParams = []) {
+        const partDef = partDescriptions[selectedPartType];
+        var filenameSegments = [];
+        for (const param of partDef.parameters) {
+            if (!skipParams.includes(param.field) && parameters[param.field] !== param.default) {
+                if (param.type === "boolean") {
+                    if (parameters[param.field]) {
+                        filenameSegments.push(param.name.toLowerCase());
+                    } else {
+                        filenameSegments.push(`no_${param.name.toLowerCase()}`);
+                    }
+                } else {
+                    filenameSegments.push(
+                        `${param.name.toLowerCase()}_${parameters[param.field]}`,
+                    );
+                }
+            }
+        }
+        return filenameSegments;
     }
 
     onMount(() => {
@@ -926,17 +1149,6 @@
                     {/if}
 
                     {#each partDescriptions[selectedPartType].parameters as parameter}
-                        <!-- <div>
-                            <label
-                                for={parameter.field}
-                                class="block text-gray-700 text-sm font-bold mb-2"
-                            >
-                                {parameter.name}
-                            </label>
-                            <p class="text-gray-500 text-sm mb-1">
-                                {parameter.description}
-                            </p> -->
-
                         {#if parameter.type === "number"}
                             <NumberParameter
                                 {parameter}
@@ -957,8 +1169,12 @@
                                 {parameter}
                                 bind:value={parameters[parameter.field]}
                             />
+                        {:else if parameter.type === "mount_hole_list"}
+                            <MountHoleListParameter
+                                {parameter}
+                                bind:value={parameters[parameter.field]}
+                            />
                         {/if}
-                        <!-- </div> -->
                     {/each}
 
                     <div class="flex gap-2">

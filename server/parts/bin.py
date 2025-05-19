@@ -12,15 +12,16 @@ app = Sanic.get_app()
 
 
 class BinDefinition(BaseModel):
-    width: Annotated[float, Field(gt=0)]
-    depth: Annotated[float, Field(gt=0)]
-    height: Annotated[float, Field(gt=0)]
-    wall_thickness: Annotated[float, Field(gt=0)]
-    bottom_thickness: Annotated[float, Field(gt=0)]
-    lip_thickness: Annotated[float, Field(gte=0)]
-    inner_rounding: Annotated[float, Field(gte=0)]
-    outer_rounding: Annotated[float, Field(gte=0)]
-    variant: Variant
+    width: Annotated[float, Field(gt=0)] = 41.5
+    depth: Annotated[float, Field(gt=0)] = 41.5
+    height: Annotated[float, Field(gt=0)] = 20
+    wall_thickness: Annotated[float, Field(gt=0)] = 1
+    bottom_thickness: Annotated[float, Field(gt=0)] = 2
+    lip_thickness: Annotated[float, Field(gte=0)] = 1
+    inner_rounding: Annotated[float, Field(gte=0)] = 1
+    outer_rounding: Annotated[float, Field(gte=0)] = 0.5
+    hanger_tolerance: Annotated[float, Field(gt=0)] = 0.15
+    variant: Variant = Variant.Original
 
 
 @app.post("/api/bin")
@@ -32,6 +33,7 @@ async def bin(request: Request, body: BinDefinition):
     return response.raw(
         await build(
             part=Part.Bin,
+            hanger_tolerance=body.hanger_tolerance,
             variant=body.variant,
             bin_width=body.width,
             bin_depth=body.depth,

@@ -26,13 +26,15 @@ async def main(request):
 
 
 # Get the API calls loaded
-import server.bin
-import server.bolt
-import server.cup
-import server.hook
-import server.tile
-import server.rack
-import server.shelf
+import server.parts.bin
+import server.parts.bolt
+import server.parts.cableclip
+import server.parts.cup
+import server.parts.hook
+import server.parts.mount
+import server.parts.tile
+import server.parts.rack
+import server.parts.shelf
 
 
 if __name__ == "__main__":

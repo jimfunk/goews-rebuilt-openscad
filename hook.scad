@@ -19,7 +19,7 @@ module hook(
 ) {
     hanger_plate_offset = get_hanger_plate_offset(variant, hanger_tolerance);
     hanger_total_thickness = hanger_thickness + hanger_plate_offset;
-    plate_total_thickness = plate_thickness + hanger_total_thickness;
+    plate_total_thickness = default_plate_thickness + hanger_total_thickness;
 
     total_width = (width * hooks) + (gap * (hooks - 1));
 

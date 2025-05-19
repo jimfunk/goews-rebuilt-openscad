@@ -19,7 +19,7 @@ module bin(
 ) {
     hanger_plate_offset = get_hanger_plate_offset(variant, hanger_tolerance);
     hanger_total_thickness = hanger_thickness + hanger_plate_offset;
-    plate_total_thickness = plate_thickness + hanger_total_thickness;
+    plate_total_thickness = default_plate_thickness + hanger_total_thickness;
 
     x_offset = get_hanger_plate_width(width) / 2;
     x_plate_offset = (get_hanger_plate_width(width) - width) / 2;

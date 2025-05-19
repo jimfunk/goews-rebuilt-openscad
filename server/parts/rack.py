@@ -12,16 +12,17 @@ app = Sanic.get_app()
 
 
 class RackDefinition(BaseModel):
-    slots: Annotated[int, Field(gt=0)]
-    slot_width: Annotated[float, Field(gt=0)]
-    divider_width: Annotated[float, Field(gt=0)]
-    divider_length: Annotated[float, Field(gt=0)]
-    divider_thickness: Annotated[float, Field(gt=0)]
-    lip: bool
-    lip_height: float
-    lip_thickness: float
-    rounding: float
-    variant: Variant
+    slots: Annotated[int, Field(gt=0)] = 7
+    slot_width: Annotated[float, Field(gt=0)] = 6
+    divider_width: Annotated[float, Field(gt=0)] = 10
+    divider_length: Annotated[float, Field(gt=0)] = 80
+    divider_thickness: Annotated[float, Field(gt=0)] = 6
+    lip: bool = False
+    lip_height: float = 8
+    lip_thickness: float = 4
+    rounding: float = 0.5
+    hanger_tolerance: Annotated[float, Field(gt=0)] = 0.15
+    variant: Variant = Variant.Original
 
 
 @app.post("/api/rack")
@@ -33,6 +34,7 @@ async def rack(request: Request, body: RackDefinition):
     return response.raw(
         await build(
             part=Part.Rack,
+            hanger_tolerance=body.hanger_tolerance,
             variant=body.variant,
             rack_slots=body.slots,
             rack_slot_width=body.slot_width,
