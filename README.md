@@ -104,7 +104,6 @@ actually writable by the `goews` user.
 
 PRs and suggestions are welcome :-)
 
-* Tile generation by width and height
 * Shelf supports
 * Bins with dividers
 * Multi-cups

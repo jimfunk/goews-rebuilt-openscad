@@ -19,6 +19,7 @@ class TileDefinition(BaseModel):
     fill_left: bool = False
     fill_right: bool = False
     reverse_stagger: bool = False
+    exact_width: bool = False
     mounting_hole_shank_diameter: Annotated[float, Field(gt=0)] = 4
     mounting_hole_head_diameter: Annotated[float, Field(gt=0)] = 8
     mounting_hole_inset_depth: Annotated[float, Field(gt=0)] = 1
@@ -57,6 +58,7 @@ async def tile(request: Request, body: TileDefinition):
             tile_fill_left=body.fill_left,
             tile_fill_right=body.fill_right,
             tile_reverse_stagger=body.reverse_stagger,
+            tile_exact_width=body.exact_width,
             tile_mounting_hole_shank_diameter=body.mounting_hole_shank_diameter,
             tile_mounting_hole_head_diameter=body.mounting_hole_head_diameter,
             tile_mounting_hole_inset_depth=body.mounting_hole_inset_depth,

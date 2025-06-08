@@ -96,6 +96,14 @@
                         "Reverse row stagger. This is useful for allowing tiles with odd numbers of rows to align with tiles with even numbers of rows at the top instead of the bottom",
                 },
                 {
+                    field: "exact_width",
+                    name: "Exact width",
+                    type: "boolean",
+                    default: false,
+                    description:
+                        "Make the tile the exact width of the tile columns. This causes every second row to have one less tile unit",
+                },
+                {
                     field: "mounting_hole_shank_diameter",
                     name: "Mounting hole shank diameter",
                     type: "number",
@@ -136,9 +144,13 @@
             ],
             getFilenameSegments: (skipParams = []) => {
                 var filenameSegments = [];
-                filenameSegments.push(`${parameters.columns}x${parameters.rows}`);
+                filenameSegments.push(
+                    `${parameters.columns}x${parameters.rows}`,
+                );
                 if (parameters.skip_list.length > 0) {
-                    filenameSegments.push(`skip-${parameters.skip_list.join("_")}`);
+                    filenameSegments.push(
+                        `skip-${parameters.skip_list.join("_")}`,
+                    );
                 }
                 skipParams.push("columns");
                 skipParams.push("rows");
@@ -206,7 +218,9 @@
             ],
             getFilenameSegments: (skipParams = []) => {
                 var filenameSegments = [];
-                filenameSegments.push(`${parameters.columns}x${parameters.rows}`);
+                filenameSegments.push(
+                    `${parameters.columns}x${parameters.rows}`,
+                );
                 skipParams.push("columns");
                 skipParams.push("rows");
                 filenameSegments.push(...getFilenameSegments(skipParams));
@@ -856,7 +870,9 @@
                     } else if (hole.hole_type === 6) {
                         holeType = "flat_head";
                     }
-                    holeDescriptions.push(`${holeType},${hole.x_offset},${hole.y_offset},${hole.diameter},${hole.depth}`);
+                    holeDescriptions.push(
+                        `${holeType},${hole.x_offset},${hole.y_offset},${hole.diameter},${hole.depth}`,
+                    );
                 }
                 filenameSegments.push(`holes-${holeDescriptions.join("_")}`);
                 skipParams.push("holes");
@@ -892,7 +908,8 @@
                     name: "Cable diameter",
                     type: "number",
                     default: 5,
-                    description: "Diameter of the cable in mm. 5 is good for CAT-5/6. 3.5 is good for USB and low power DC. 8 is good for IEC AC power cables",
+                    description:
+                        "Diameter of the cable in mm. 5 is good for CAT-5/6. 3.5 is good for USB and low power DC. 8 is good for IEC AC power cables",
                 },
                 {
                     field: "width",
@@ -906,7 +923,8 @@
                     name: "Height",
                     type: "number",
                     default: 8,
-                    description: "Height of the clip in mm, not including the base thickness",
+                    description:
+                        "Height of the clip in mm, not including the base thickness",
                 },
                 {
                     field: "thickness",
@@ -1035,13 +1053,13 @@
         var skipParams = ["variant"];
         var filenameSegments = [baseName];
 
-        if (partDef.parameters.find(p => p.field === "variant")) {
+        if (partDef.parameters.find((p) => p.field === "variant")) {
             if (parameters.variant === 1) {
                 filenameSegments.push("thicker-cleats");
             }
         }
 
-        if (partDef.hasOwnProperty("getFilenameSegments"))  {
+        if (partDef.hasOwnProperty("getFilenameSegments")) {
             console.log("has getFilenameSegments");
             filenameSegments.push(...partDef.getFilenameSegments(skipParams));
         } else {
@@ -1055,7 +1073,10 @@
         const partDef = partDescriptions[selectedPartType];
         var filenameSegments = [];
         for (const param of partDef.parameters) {
-            if (!skipParams.includes(param.field) && parameters[param.field] !== param.default) {
+            if (
+                !skipParams.includes(param.field) &&
+                parameters[param.field] !== param.default
+            ) {
                 if (param.type === "boolean") {
                     if (parameters[param.field]) {
                         filenameSegments.push(param.name.toLowerCase());

@@ -424,6 +424,7 @@ module tile(
     fill_left=false,
     fill_right=false,
     reverse_stagger=false,
+    exact_width=false,
     mounting_hole_shank_diameter=4,
     mounting_hole_head_diameter=8,
     mounting_hole_inset_depth=1,
@@ -437,18 +438,21 @@ module tile(
 
     for (row = [0 : rows - 1]) {
         offset_x = (row % 2 == stagger_0) ? tile_width / 2 : 0;
+        start_column = exact_width && (row % 2 == stagger_1) ? 1 : 0;
+        row_fill_left = fill_left && ((exact_width && !offset_x) || (!exact_width && offset_x) ? true : false);
+        row_fill_right = fill_right && (offset_x ? false : true);
+        pos_y = row * tile_y_offset;
+        bottom = row == 0;
+        top = row == (rows - 1);
 
-        for (column = [0 : columns - 1]) {
+        for (column = [start_column : columns - 1]) {
             pos_x = offset_x + column * tile_width;
-            pos_y = row * tile_y_offset;
 
             // Determine outer corners and edges
             left_outside = (column == 0) && (row % 2 == stagger_1);
             left_inside = ((column == 0) && (row % 2 == stagger_0));
             right_outside = (column == (columns - 1)) && (row % 2 == stagger_0);
             right_inside = (column == (columns - 1)) && (row % 2 == stagger_1);
-            bottom = row == 0;
-            top = row == (rows - 1);
 
             if (!in_list([row + 1, column + 1], skiplist)) {
                 translate([pos_x, pos_y, 0])
@@ -472,30 +476,33 @@ module tile(
                         fill_right=fill_right
                     );
             }
-            if (fill_left && column == 0 && offset_x) {
-                translate([0, pos_y, 0])
-                    hex_fill_left(
-                        chamfer_rear=chamfer_rear,
-                        bottom=bottom,
-                        top=top,
-                        fill_bottom=fill_bottom,
-                        fill_top=fill_top,
-                        fill_left=fill_left,
-                        fill_right=fill_right
-                    );
-            }
-            if (fill_right && column == (columns -1 ) && !offset_x) {
-                translate([pos_x + tile_width, pos_y, 0])
-                    hex_fill_right(
-                        chamfer_rear=chamfer_rear,
-                        bottom=bottom,
-                        top=top,
-                        fill_bottom=fill_bottom,
-                        fill_top=fill_top,
-                        fill_left=fill_left,
-                        fill_right=fill_right
-                    );
-            }
+        }
+
+        if (row_fill_left) {
+            fill_offset_x = exact_width ? tile_width / 2 : 0;
+            translate([fill_offset_x, pos_y, 0])
+                hex_fill_left(
+                    chamfer_rear=chamfer_rear,
+                    bottom=bottom,
+                    top=top,
+                    fill_bottom=fill_bottom,
+                    fill_top=fill_top,
+                    fill_left=fill_left,
+                    fill_right=fill_right
+                );
+        }
+
+        if (row_fill_right) {
+            translate([offset_x + tile_width * columns, pos_y, 0])
+                hex_fill_right(
+                    chamfer_rear=chamfer_rear,
+                    bottom=bottom,
+                    top=top,
+                    fill_bottom=fill_bottom,
+                    fill_top=fill_top,
+                    fill_left=fill_left,
+                    fill_right=fill_right
+                );
         }
 
         if (fill_top && row == (rows - 1)) {
@@ -503,14 +510,15 @@ module tile(
             even_row = (row + 1) % 2 == stagger_0;
             offset_x = even_row ? tile_width / 2 : tile_width;
 
-            for (column = [0 : columns]) {
+            for (column = [start_column : columns]) {
                 pos_x = (offset_x + column * tile_width) - tile_width;
                 pos_y = tile_y_offset * (row + 1);
-                crop_left = (column == 0 && ! fill_left);
+                crop_left = (column == start_column && (fill_left && !row_fill_left));
+                crop_right = (column == columns && (!fill_right || !even_row));
                 translate([pos_x, pos_y, 0])
                     hex_fill_top(
-                        crop_left=(column == 0 && (!fill_left || even_row)),
-                        crop_right=(column == columns && (!fill_right || !even_row)),
+                        crop_left=crop_left,
+                        crop_right=crop_right,
                         mounting_hole_shank_diameter=mounting_hole_shank_diameter,
                         mounting_hole_head_diameter=mounting_hole_head_diameter,
                         mounting_hole_inset_depth=mounting_hole_inset_depth,
@@ -522,16 +530,17 @@ module tile(
 
         if (fill_bottom && row == 0) {
             // Fill in bottom row
-            offset_x = reverse_stagger ? tile_width / -2 : 0;
+            bottom_offset_x = offset_x - tile_width / 2;
 
-            for (column = [0 : columns]) {
-                pos_x = (offset_x + column * tile_width);
-                echo(pos_x);
+            for (column = [start_column : columns]) {
+                pos_x = (bottom_offset_x + column * tile_width);
                 pos_y = tile_y_offset * (row);
+                crop_left=column == start_column && !row_fill_left;
+                crop_right=column == columns && !row_fill_right;
                 translate([pos_x, pos_y, 0])
                     hex_fill_bottom(
-                        crop_left=(column == 0 && (!fill_left || reverse_stagger)),
-                        crop_right=(column == columns && (!fill_right || !reverse_stagger)),
+                        crop_left=crop_left,
+                        crop_right=crop_right,
                         chamfer_rear=chamfer_rear
                     );
             }
