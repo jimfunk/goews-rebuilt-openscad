@@ -30,10 +30,10 @@ module hanger(variant=variant_original, hanger_tolerance, extended_bottom=false)
         }
 
         // Rear chamfer
-        translate([0, hanger_thickness, 0])
+        translate([-0.1, hanger_thickness, 0])
             rotate([135, 0, 0])
                 linear_extrude(hanger_thickness)
-                    square([hanger_width, hanger_thickness * 2]);
+                    square([hanger_width + 0.2, hanger_thickness * 2]);
 
         // Rear tile cutoff (only on thicker cleats)
         if (variant == variant_thicker_cleats) {
@@ -52,9 +52,9 @@ module hanger(variant=variant_original, hanger_tolerance, extended_bottom=false)
         }
 
         // Cutout
-        translate([hanger_width / 2, 0, hanger_bolt_notch_center_height])
+        translate([hanger_width / 2, -0.1, hanger_bolt_notch_center_height])
             rotate([270, 0, 0])
-                linear_extrude(height = hanger_total_thickness)
+                linear_extrude(height = hanger_total_thickness + 0.2)
                     circle(r=hanger_bolt_notch_radius);
     }
 }
@@ -153,12 +153,12 @@ module hanger_plate(
 
         if (outer_radius) {
             // Outer roundovers
-            translate([0, hanger_total_thickness + plate_thickness, total_plate_height])
+            translate([0, hanger_total_thickness + plate_thickness + 0.1, total_plate_height])
                 rotate([90, 90, 0])
-                    rounding_edge_mask(l=plate_thickness, r=outer_radius, anchor=BOTTOM);
-            translate([total_plate_width, hanger_total_thickness + plate_thickness, total_plate_height])
+                    rounding_edge_mask(l=plate_thickness + 0.2, r=outer_radius, anchor=BOTTOM);
+            translate([total_plate_width, hanger_total_thickness + plate_thickness + 0.1, total_plate_height])
                 rotate([90, 180, 0])
-                    rounding_edge_mask(l=plate_thickness, r=outer_radius, anchor=BOTTOM);
+                    rounding_edge_mask(l=plate_thickness + 0.2, r=outer_radius, anchor=BOTTOM);
         }
     }
 }

@@ -20,7 +20,7 @@ class BinDefinition(BaseModel):
     lip_thickness: Annotated[float, Field(gte=0)] = 1
     inner_rounding: Annotated[float, Field(gte=0)] = 1
     outer_rounding: Annotated[float, Field(gte=0)] = 0.5
-    hanger_tolerance: Annotated[float, Field(gt=0)] = 0.15
+    hanger_tolerance: Annotated[float, Field(ge=0)] = 0.15
     variant: Variant = Variant.Original
 
 

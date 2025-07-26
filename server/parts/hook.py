@@ -21,7 +21,7 @@ class HookDefinition(BaseModel):
     post_thickness: float = 6
     lip_thickness: float = 0
     rounding: float = 0.5
-    hanger_tolerance: Annotated[float, Field(gt=0)] = 0.15
+    hanger_tolerance: Annotated[float, Field(ge=0)] = 0.15
     variant: Variant = Variant.Original
 
 

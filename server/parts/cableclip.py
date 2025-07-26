@@ -27,7 +27,7 @@ class CableclipDefinition(BaseModel):
     gap: Annotated[float, Field(gt=0)] = 10
     lip_thickness: float = 2
     rounding: float = 0.5
-    hanger_tolerance: Annotated[float, Field(gt=0)] = 0.15
+    hanger_tolerance: Annotated[float, Field(ge=0)] = 0.15
     variant: Variant = Variant.Original
 
 

@@ -44,7 +44,7 @@ class MountDefinition(BaseModel):
     minimum_width: Annotated[float, Field(gte=0)] = 0
     minimum_height: Annotated[float, Field(gte=0)] = 0
     bolt_notch: bool = True
-    hanger_tolerance: Annotated[float, Field(gt=0)] = 0.15
+    hanger_tolerance: Annotated[float, Field(ge=0)] = 0.15
     variant: Variant = Variant.Original
 
 

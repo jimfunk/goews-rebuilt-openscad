@@ -17,7 +17,7 @@ class ShelfDefinition(BaseModel):
     thickness: Annotated[float, Field(gt=0)] = 4
     rear_fillet_radius: Annotated[float, Field(gte=0)] = 1
     rounding: Annotated[float, Field(gte=0)] = 0.5
-    hanger_tolerance: Annotated[float, Field(gt=0)] = 0.15
+    hanger_tolerance: Annotated[float, Field(ge=0)] = 0.15
     variant: Variant = Variant.Original
 
 
@@ -55,7 +55,7 @@ class HoleShelfDefinition(BaseModel):
     stagger: bool = False
     rear_fillet_radius: Annotated[float, Field(gte=0)] = 1
     rounding: Annotated[float, Field(gte=0)] = 0.5
-    hanger_tolerance: Annotated[float, Field(gt=0)] = 0.15
+    hanger_tolerance: Annotated[float, Field(ge=0)] = 0.15
     variant: Variant = Variant.Original
 
 
@@ -99,7 +99,7 @@ class SlotShelfDefinition(BaseModel):
     side_gap: Annotated[float, Field(gt=0)] = 5
     rear_fillet_radius: Annotated[float, Field(gte=0)] = 1
     rounding: Annotated[float, Field(gte=0)] = 0.5
-    hanger_tolerance: Annotated[float, Field(gt=0)] = 0.15
+    hanger_tolerance: Annotated[float, Field(ge=0)] = 0.15
     variant: Variant = Variant.Original
 
 
@@ -139,7 +139,7 @@ class GridfinityShelfDefinition(BaseModel):
     magnet_holes: bool = False
     magnet_hole_crush_ribs: bool = False
     magnet_hole_chamfer: bool = False
-    hanger_tolerance: Annotated[float, Field(gt=0)] = 0.15
+    hanger_tolerance: Annotated[float, Field(ge=0)] = 0.15
     variant: Variant = Variant.Original
 
 

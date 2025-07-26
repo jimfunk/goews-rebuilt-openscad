@@ -21,7 +21,7 @@ class RackDefinition(BaseModel):
     lip_height: float = 8
     lip_thickness: float = 4
     rounding: float = 0.5
-    hanger_tolerance: Annotated[float, Field(gt=0)] = 0.15
+    hanger_tolerance: Annotated[float, Field(ge=0)] = 0.15
     variant: Variant = Variant.Original
 
 
