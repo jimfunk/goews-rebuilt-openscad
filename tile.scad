@@ -513,8 +513,8 @@ module tile(
             for (column = [start_column : columns]) {
                 pos_x = (offset_x + column * tile_width) - tile_width;
                 pos_y = tile_y_offset * (row + 1);
-                crop_left = (column == start_column && (fill_left && !row_fill_left));
-                crop_right = (column == columns && (!fill_right || !even_row));
+                crop_left = column == start_column && !row_fill_left;
+                crop_right = column == columns && !row_fill_right;
                 translate([pos_x, pos_y, 0])
                     hex_fill_top(
                         crop_left=crop_left,
