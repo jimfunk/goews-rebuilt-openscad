@@ -66,7 +66,7 @@ module hanger_plate_unit(
     bolt_notch=true,
     bolt_notch_thickness=default_plate_thickness,
     hanger_tolerance=0.15,
-    extend_bottom=0
+    extend_bottom=0,
 ) {
     hanger_plate_offset = get_hanger_plate_offset(variant, hanger_tolerance);
     hanger_total_thickness = hanger_thickness + hanger_plate_offset;
@@ -123,11 +123,12 @@ module hanger_plate(
     hanger_units=1,
     hanger_tolerance=0.15,
     extend_bottom=0,
-    outer_radius=plate_outer_radius
+    outer_radius=plate_outer_radius,
+    plate_side_tolerance=plate_side_tolerance,  // Add tolerance to sides to make it easier to have multiple units next to each other
 ) {
     hanger_plate_offset = get_hanger_plate_offset(variant, hanger_tolerance);
     hanger_total_thickness = hanger_thickness + hanger_plate_offset;
-    total_plate_width = (hanger_units * plate_width) + ((hanger_units - 1) * plate_gap) ;
+    total_plate_width = hanger_units * plate_width;
     total_plate_height = plate_height + extend_bottom;
 
     difference() {
@@ -135,28 +136,30 @@ module hanger_plate(
         union() {
             for (i = [0:hanger_units - 1]) {
                 // Plate with hanger
-                translate([(plate_width + plate_gap) * i, 0, 0])
+                translate([(plate_width) * i, 0, 0])
                     hanger_plate_unit(
                         variant=variant,
                         plate_thickness=plate_thickness,
                         hanger_tolerance=hanger_tolerance,
                         extend_bottom=extend_bottom,
-                        bolt_notch=bolt_notch
+                        bolt_notch=bolt_notch,
                     );
-                // Fill the gaps if we have multiple hangers
-                if (i > 0 && i < hanger_units) {
-                    translate([((plate_width + plate_gap) * (i - 1)) + plate_width, hanger_total_thickness, 0])
-                        cube([plate_gap, plate_thickness, total_plate_height]);
-                }
             }
+        }
+
+        if (plate_side_tolerance) {
+            translate([-0.1, 0, 0])
+                cube([plate_side_tolerance + 0.1, hanger_total_thickness + plate_thickness + 0.1, total_plate_height + 0.1]);
+            translate([total_plate_width - plate_side_tolerance, 0, 0])
+                cube([plate_side_tolerance + 0.1, hanger_total_thickness + plate_thickness + 0.1, total_plate_height + 0.1]);
         }
 
         if (outer_radius) {
             // Outer roundovers
-            translate([0, hanger_total_thickness + plate_thickness + 0.1, total_plate_height])
+            translate([plate_side_tolerance, hanger_total_thickness + plate_thickness + 0.1, total_plate_height])
                 rotate([90, 90, 0])
                     rounding_edge_mask(l=plate_thickness + 0.2, r=outer_radius, anchor=BOTTOM);
-            translate([total_plate_width, hanger_total_thickness + plate_thickness + 0.1, total_plate_height])
+            translate([total_plate_width - plate_side_tolerance, hanger_total_thickness + plate_thickness + 0.1, total_plate_height])
                 rotate([90, 180, 0])
                     rounding_edge_mask(l=plate_thickness + 0.2, r=outer_radius, anchor=BOTTOM);
         }
@@ -198,7 +201,7 @@ module hanger_mount(
 
     // We are referencing the holes from the left top of the plate, so we need to know
     // the full width and height
-    full_plate_width = (units * plate_width) + ((units > 0 ? units - 1 : 0) * plate_gap);
+    full_plate_width = units * plate_width;
     full_plate_height = max(plate_height, needed_plate_height);
 
     difference() {

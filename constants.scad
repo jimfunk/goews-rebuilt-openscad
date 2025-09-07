@@ -24,11 +24,12 @@ hanger_bolt_notch_head_clearance_diameter = 20;
 // Hanger plate offset (thicker cleats only)
 hanger_offset = 0.75;
 
-// Plate width
-plate_width = 41.5;
+// Nominal plate width
+plate_width = 42;
 
-// The distance added between plate hangers when there are multiple
-plate_gap = 0.5;
+// Reduce overall plate width by this amount on each side to make it easier to have
+// multiple plates next to each other
+plate_side_tolerance = 0.25;
 
 // Default plate thickness
 default_plate_thickness = 3;
@@ -160,12 +161,12 @@ function get_hanger_plate_offset(variant, hanger_tolerance) =
 
 // Get the number of hanger units needed for the given width
 function get_hanger_units_from_width(width) =
-    ceil((width + (width > plate_width ? plate_gap : 0)) / (plate_width + plate_gap));
+    ceil(width / plate_width);
 
 // Get the total hanger plate width for the given width
 function get_hanger_plate_width(width) =
     let(units = get_hanger_units_from_width(width))
-        (units * plate_width) + ((units > 0 ? units - 1 : 0) * plate_gap);
+        (units * plate_width);
 
 
 // Get hex nut width according to the nearest metric bolt diameter

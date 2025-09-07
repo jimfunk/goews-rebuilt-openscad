@@ -133,9 +133,16 @@ async def slot_shelf(request: Request, body: SlotShelfDefinition):
 class GridfinityShelfDefinition(BaseModel):
     gridx: Annotated[int, Field(gt=0)] = 2
     gridy: Annotated[int, Field(gt=0)] = 1
+    plate_thickness: Annotated[float, Field(gte=0)] = 3
     rear_offset: Annotated[float, Field(gte=0)] = 4.5
     base_thickness: Annotated[float, Field(gte=0)] = 0
     skeletonized: bool = True
+    sides: bool = False
+    side_thickness: Annotated[float, Field(gt=0)] = 2
+    side_height: Annotated[float, Field(gt=0)] = 20
+    front: bool = False
+    front_thickness: Annotated[float, Field(gt=0)] = 2
+    front_height: Annotated[float, Field(gt=0)] = 20
     magnet_holes: bool = False
     magnet_hole_crush_ribs: bool = False
     magnet_hole_chamfer: bool = False
@@ -156,9 +163,16 @@ async def gridfinity_shelf(request: Request, body: GridfinityShelfDefinition):
             variant=body.variant,
             gridfinity_shelf_gridx=body.gridx,
             gridfinity_shelf_gridy=body.gridy,
+            gridfinity_shelf_plate_thickness=body.plate_thickness,
             gridfinity_shelf_rear_offset=body.rear_offset,
             gridfinity_shelf_base_thickness=body.base_thickness,
             gridfinity_shelf_skeletonized=body.skeletonized,
+            gridfinity_shelf_sides=body.sides,
+            gridfinity_shelf_side_thickness=body.side_thickness,
+            gridfinity_shelf_side_height=body.side_height,
+            gridfinity_shelf_front=body.front,
+            gridfinity_shelf_front_thickness=body.front_thickness,
+            gridfinity_shelf_front_height=body.front_height,
             gridfinity_shelf_magnet_holes=body.magnet_holes,
             gridfinity_shelf_magnet_hole_crush_ribs=body.magnet_hole_crush_ribs,
             gridfinity_shelf_magnet_hole_chamfer=body.magnet_hole_chamfer,

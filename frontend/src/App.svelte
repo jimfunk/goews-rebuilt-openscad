@@ -644,6 +644,13 @@
                     description: "Number of grid units in the Y direction",
                 },
                 {
+                    field: "plate_thickness",
+                    name: "Plate thickness",
+                    type: "number",
+                    default: 3,
+                    description: "Thickness of rear plate",
+                },
+                {
                     field: "rear_offset",
                     name: "Rear offset",
                     type: "number",
@@ -665,6 +672,54 @@
                     default: true,
                     description:
                         "When the base thickness is > 0 this will remove unnecessary material from the base",
+                },
+                {
+                    field: "sides",
+                    name: "Sides",
+                    type: "boolean",
+                    default: false,
+                    description:
+                        "Adds sides to the shelf. This can greatly improve rigidity",
+                },
+                {
+                    field: "side_thickness",
+                    name: "Side thickness",
+                    type: "number",
+                    default: 2,
+                    description:
+                        "Thickness of sides",
+                },
+                {
+                    field: "side_height",
+                    name: "Side height",
+                    type: "number",
+                    default: 20,
+                    description:
+                        "Height of sides",
+                },
+                {
+                    field: "front",
+                    name: "Front",
+                    type: "boolean",
+                    default: false,
+                    description:
+                        "Adds a front to the shelf. This can improve rigidity",
+                },
+                {
+                    field: "front_thickness",
+                    name: "Front thickness",
+                    type: "number",
+                    default: 2,
+                    description:
+                        "Thickness of front",
+                },
+                {
+                    field: "front_height",
+                    name: "Front height",
+                    type: "number",
+                    default: 20,
+                    description:
+                        "Height of front",
                 },
                 {
                     field: "magnet_holes",

@@ -270,11 +270,32 @@ gridfinity_shelf_gridy = 1;
 // Distance between plate and base in mm
 gridfinity_shelf_rear_offset = 4.5;
 
+// Thickness of hanger plate
+gridfinity_shelf_plate_thickness = 3;
+
 // Additional base thickness in mm. This improves rigidity but can be 0 to implement a thin baseplate
 gridfinity_shelf_base_thickness = 0;
 
 // Skeletonized. When the base thickness is > 0 this will remove unnecessary material from the base
 gridfinity_shelf_skeletonized = true;
+
+// Add sides to the shelf
+gridfinity_shelf_sides = false;
+
+// Width of the shelf sides
+gridfinity_shelf_side_thickness = 2;
+
+// Height of shelf sides
+gridfinity_shelf_side_height = 20;
+
+// Add front face to the shelf
+gridfinity_shelf_front = false;
+
+// Thickness of the shelf front
+gridfinity_shelf_front_thickness = 2;
+
+// Height of the shelf front
+gridfinity_shelf_front_height = 10;
 
 // Add magnet holes. Will be ignored if base thickness is < 4
 gridfinity_shelf_magnet_holes = false;
@@ -469,8 +490,15 @@ else if (part == 10)
         gridx=gridfinity_shelf_gridx,
         gridy=gridfinity_shelf_gridy,
         rear_offset=gridfinity_shelf_rear_offset,
+        plate_thickness=gridfinity_shelf_plate_thickness,
         base_thickness=gridfinity_shelf_base_thickness,
         skeletonized=gridfinity_shelf_skeletonized,
+        sides=gridfinity_shelf_sides,
+        side_thickness=gridfinity_shelf_side_thickness,
+        side_height=gridfinity_shelf_side_height,
+        front=gridfinity_shelf_front,
+        front_thickness=gridfinity_shelf_front_thickness,
+        front_height=gridfinity_shelf_front_height,
         magnet_holes=gridfinity_shelf_magnet_holes,
         magnet_hole_crush_ribs=gridfinity_shelf_magnet_hole_crush_ribs,
         magnet_hole_chamfer=gridfinity_shelf_magnet_hole_chamfer,
