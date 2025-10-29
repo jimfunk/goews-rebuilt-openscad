@@ -206,38 +206,38 @@ function get_hex_nut_width(diameter) =
 
 // Get hex nut thickness according to the nearest metric bolt diameter
 function get_hex_nut_thickness(diameter) =
-  let (
-    rounded_diameter = floor(diameter * 2) / 2 // Round down to nearest 0.5
-  )
-  (rounded_diameter <= 2) ? 1.6 : // M2
-  (rounded_diameter <= 2.5) ? 2.15 :  // M2.5
-  (rounded_diameter <= 3) ? 2.4 :  // M3
-  (rounded_diameter <= 4) ? 3.2 :  // M4
-  (rounded_diameter <= 5) ? 4 :  // M5
-  (rounded_diameter <= 6) ? 5 :  // M6
-  (rounded_diameter <= 7) ? 5.5 :  // M7
-  (rounded_diameter <= 8) ? 6.16 :  // M8
-  (rounded_diameter <= 10) ? 7.65 :  // M10
-  (rounded_diameter <= 12) ? 9.2 :  // M12
-  (rounded_diameter <= 14) ? 10.3 :  // M14
-  (rounded_diameter <= 16) ? 11.3 :  // M16
-  (rounded_diameter <= 18) ? 12.8 :  // M18
-  (rounded_diameter <= 20) ? 14 :  // M20
-  (rounded_diameter <= 22) ? 15.4 :  // M22
-  (rounded_diameter <= 24) ? 17 :  // M24
-  (rounded_diameter <= 27) ? 18.7 :  // M27
-  (rounded_diameter <= 30) ? 21.5 :  // M30
-  (rounded_diameter <= 33) ? 23.8 :  // M33
-  (rounded_diameter <= 36) ? 25.8 :  // M36
-  (rounded_diameter <= 39) ? 28.8 :  // M39
-  (rounded_diameter <= 42) ? 31.4 :  // M42
-  (rounded_diameter <= 45) ? 34.4 :  // M45
-  (rounded_diameter <= 48) ? 37.4 :  // M48
-  (rounded_diameter <= 52) ? 40.4 :  // M52
-  (rounded_diameter <= 56) ? 43.7 :  // M56
-  (rounded_diameter <= 60) ? 47  :  // M60
-  (rounded_diameter <= 64) ? 50.3 :  // M64
-  (50.3 + 0.825 * (rounded_diameter - 64)); // Extrapolate beyond M64
+    let (
+        rounded_diameter = floor(diameter * 2) / 2 // Round down to nearest 0.5
+    )
+    (rounded_diameter <= 2) ? 1.6 : // M2
+    (rounded_diameter <= 2.5) ? 2.15 :  // M2.5
+    (rounded_diameter <= 3) ? 2.4 :  // M3
+    (rounded_diameter <= 4) ? 3.2 :  // M4
+    (rounded_diameter <= 5) ? 4 :  // M5
+    (rounded_diameter <= 6) ? 5 :  // M6
+    (rounded_diameter <= 7) ? 5.5 :  // M7
+    (rounded_diameter <= 8) ? 6.16 :  // M8
+    (rounded_diameter <= 10) ? 7.65 :  // M10
+    (rounded_diameter <= 12) ? 9.2 :  // M12
+    (rounded_diameter <= 14) ? 10.3 :  // M14
+    (rounded_diameter <= 16) ? 11.3 :  // M16
+    (rounded_diameter <= 18) ? 12.8 :  // M18
+    (rounded_diameter <= 20) ? 14 :  // M20
+    (rounded_diameter <= 22) ? 15.4 :  // M22
+    (rounded_diameter <= 24) ? 17 :  // M24
+    (rounded_diameter <= 27) ? 18.7 :  // M27
+    (rounded_diameter <= 30) ? 21.5 :  // M30
+    (rounded_diameter <= 33) ? 23.8 :  // M33
+    (rounded_diameter <= 36) ? 25.8 :  // M36
+    (rounded_diameter <= 39) ? 28.8 :  // M39
+    (rounded_diameter <= 42) ? 31.4 :  // M42
+    (rounded_diameter <= 45) ? 34.4 :  // M45
+    (rounded_diameter <= 48) ? 37.4 :  // M48
+    (rounded_diameter <= 52) ? 40.4 :  // M52
+    (rounded_diameter <= 56) ? 43.7 :  // M56
+    (rounded_diameter <= 60) ? 47  :  // M60
+    (rounded_diameter <= 64) ? 50.3 :  // M64
+    (50.3 + 0.825 * (rounded_diameter - 64)); // Extrapolate beyond M64
 
 // Get DIN 912 socket head cap screw head diameter according to the nearest metric bolt
 // diameter

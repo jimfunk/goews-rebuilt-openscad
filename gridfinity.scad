@@ -42,6 +42,7 @@ module gridfinity_shelf(
     gridx=2,  // Number of grid units in the x direction (width)
     gridy=1,  // Number of grid units in the y direction (depth)
     rear_offset=4.5,  // Offset of the rear edge from the back of the shelf
+    max_rear_offset_fillet=10, // Maximum size of the the fillet added when rear_offset is set
     base_thickness=2,  // Additional thickness of the shelf base
     skeletonized=true,  // Use skeletonized pattern on base. Only used if base_thickness > 0
     sides=false,  // Add sides to the shelf
@@ -125,7 +126,7 @@ module gridfinity_shelf(
 
         // Rear fillet
         translate([x_offset, plate_total_thickness, total_baseplate_height]) {
-            fillet(l=total_plate_width, r=rear_offset, orient=LEFT);
+            fillet(l=total_plate_width, r=min(rear_offset, max_rear_offset_fillet), orient=LEFT);
         }
 
         // Sides

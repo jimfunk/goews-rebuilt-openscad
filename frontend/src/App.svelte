@@ -658,6 +658,13 @@
                     description: "Distance between plate and base in mm",
                 },
                 {
+                    field: "max_rear_offset_fillet",
+                    name: "Maximum rear offset fillet",
+                    type: "number",
+                    default: 10,
+                    description: "Maximum radius of the fillet between plate and base in mm",
+                },
+                {
                     field: "base_thickness",
                     name: "Base thickness",
                     type: "number",

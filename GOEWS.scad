@@ -270,6 +270,9 @@ gridfinity_shelf_gridy = 1;
 // Distance between plate and base in mm
 gridfinity_shelf_rear_offset = 4.5;
 
+// Maximum radius of the fillet between plate and base in mm
+gridfinity_shelf_max_rear_offset_fillet = 10;
+
 // Thickness of hanger plate
 gridfinity_shelf_plate_thickness = 3;
 
@@ -490,6 +493,7 @@ else if (part == 10)
         gridx=gridfinity_shelf_gridx,
         gridy=gridfinity_shelf_gridy,
         rear_offset=gridfinity_shelf_rear_offset,
+        max_rear_offset_fillet=gridfinity_shelf_max_rear_offset_fillet,
         plate_thickness=gridfinity_shelf_plate_thickness,
         base_thickness=gridfinity_shelf_base_thickness,
         skeletonized=gridfinity_shelf_skeletonized,

@@ -135,6 +135,7 @@ class GridfinityShelfDefinition(BaseModel):
     gridy: Annotated[int, Field(gt=0)] = 1
     plate_thickness: Annotated[float, Field(gte=0)] = 3
     rear_offset: Annotated[float, Field(gte=0)] = 4.5
+    max_rear_offset_fillet: Annotated[float, Field(gte=0)] = 10
     base_thickness: Annotated[float, Field(gte=0)] = 0
     skeletonized: bool = True
     sides: bool = False
@@ -165,6 +166,7 @@ async def gridfinity_shelf(request: Request, body: GridfinityShelfDefinition):
             gridfinity_shelf_gridy=body.gridy,
             gridfinity_shelf_plate_thickness=body.plate_thickness,
             gridfinity_shelf_rear_offset=body.rear_offset,
+            gridfinity_shelf_max_rear_offset_fillet=body.max_rear_offset_fillet,
             gridfinity_shelf_base_thickness=body.base_thickness,
             gridfinity_shelf_skeletonized=body.skeletonized,
             gridfinity_shelf_sides=body.sides,
