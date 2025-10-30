@@ -108,4 +108,3 @@ PRs and suggestions are welcome :-)
 * Bins with dividers
 * Multi-cups
 * Optional multiple vertical hangers for taller items
-* More socket and flange options for bolts

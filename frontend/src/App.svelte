@@ -15,6 +15,8 @@
     let errorMessage = null;
     let stlUrl = null;
     let stlBlob = null;
+    let generatedParameters = {};
+    $: isDirty = JSON.stringify(parameters) !== JSON.stringify(generatedParameters);
 
     const parameterCacheKey = "partParameters";
 
@@ -27,7 +29,8 @@
             0: "Original version",
             1: "Thicker cleats",
         },
-        description: "Tile variant",
+        description:
+            "Tile variant. Thicker cleats offers 60% more weight capacity and a 10% reduction in tile filament usage. Note that tiles and accessories with different variants are not compatible with each other.",
     };
 
     const hangerToleranceParameter = {
@@ -240,11 +243,60 @@
                         "Length of the threaded part of the bolt in mm",
                 },
                 {
-                    field: "socket_width",
-                    name: "Socket width",
+                    field: "head_type",
+                    name: "Head type",
+                    type: "select",
+                    default: 0,
+                    options: {
+                        0: "Original",
+                        1: "Round",
+                    },
+                    description: "Type of bolt head",
+                },
+                {
+                    field: "head_recess_type",
+                    name: "Head recess type",
+                    type: "select",
+                    default: 0,
+                    options: {
+                        0: "Hex",
+                        1: "Slot",
+                        2: "Philips #2",
+                        3: "Philips #3",
+                    },
+                    description: "Type of bolt head recess",
+                },
+                {
+                    field: "head_recess_depth",
+                    name: "head recess depth",
+                    type: "number",
+                    default: 0,
+                    description:
+                        "Head recess depth in mm. If 0 a default based on the type will be used",
+                },
+                {
+                    field: "hex_socket_width",
+                    name: "Hex socket width",
                     type: "number",
                     default: 8.4,
-                    description: "Width of the socket in mm",
+                    description:
+                        "Width of the hex socket in mm when recess type is hex",
+                },
+                {
+                    field: "slot_recess_width",
+                    name: "Slot recess width",
+                    type: "number",
+                    default: 2,
+                    description:
+                        "Width of the slot recess in mm when recess type is slot",
+                },
+                {
+                    field: "slot_recess_length",
+                    name: "Slot recess length",
+                    type: "number",
+                    default: 10,
+                    description:
+                        "Length of the slot recess in mm when recess type is slot",
                 },
             ],
             getFilenameSegments: (skipParams = []) => {
@@ -662,7 +714,8 @@
                     name: "Maximum rear offset fillet",
                     type: "number",
                     default: 10,
-                    description: "Maximum radius of the fillet between plate and base in mm",
+                    description:
+                        "Maximum radius of the fillet between plate and base in mm",
                 },
                 {
                     field: "base_thickness",
@@ -693,16 +746,14 @@
                     name: "Side thickness",
                     type: "number",
                     default: 2,
-                    description:
-                        "Thickness of sides",
+                    description: "Thickness of sides",
                 },
                 {
                     field: "side_height",
                     name: "Side height",
                     type: "number",
                     default: 20,
-                    description:
-                        "Height of sides",
+                    description: "Height of sides",
                 },
                 {
                     field: "front",
@@ -717,16 +768,14 @@
                     name: "Front thickness",
                     type: "number",
                     default: 2,
-                    description:
-                        "Thickness of front",
+                    description: "Thickness of front",
                 },
                 {
                     field: "front_height",
                     name: "Front height",
                     type: "number",
                     default: 20,
-                    description:
-                        "Height of front",
+                    description: "Height of front",
                 },
                 {
                     field: "magnet_holes",
@@ -1087,6 +1136,8 @@
             }
             stlBlob = await response.blob();
             stlUrl = URL.createObjectURL(stlBlob);
+            // Remember parameters in case they change
+            generatedParameters = { ...parameters };
             saveParameters();
         } catch (error) {
             console.error("Generation failed:", error);
@@ -1314,9 +1365,10 @@
                     </div>
                 {/if}
             </div>
-            {#if stlUrl}
+            {#if stlUrl && !isDirty}
                 <button
                     on:click={download}
+                    disabled={isDirty}
                     class="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                 >
                     Download

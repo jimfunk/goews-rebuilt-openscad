@@ -124,8 +124,23 @@ rack_rounding = 0.5;
 // Bolt length in mm
 bolt_length = 9;
 
-// Bolt socket width in mm
-bolt_socket_width = 8.4;
+// Bolt head type
+bolt_head_type = 0; // [0: Original, 1: Round]
+
+// Bolt head recess type
+bolt_head_recess_type = 0; // [0: Hex, 1: Slot, 2: Philips #2, 3: Philips #3]
+
+// Recess depth. If 0 a default based on the type will be used
+bolt_head_recess_depth = 0;
+
+// Bolt socket recess width in mm
+bolt_hex_socket_width = 8.4;
+
+// Width of bolt slot recess
+bolt_slot_recess_width=2;
+
+// Length of bolt slot recess
+bolt_slot_recess_length=10;
 
 /* [Shelf parameters] */
 // Shelf width
@@ -394,7 +409,12 @@ else if (part == 1)
 else if (part == 2)
     bolt(
         length=bolt_length,
-        socket_width=bolt_socket_width
+        head_type=bolt_head_type,
+        head_recess_type=bolt_head_recess_type,
+        head_recess_depth=bolt_head_recess_depth,
+        hex_socket_width=bolt_hex_socket_width,
+        slot_recess_width=bolt_slot_recess_width,
+        slot_recess_length=bolt_slot_recess_length,
     );
 else if (part == 3)
     rack(

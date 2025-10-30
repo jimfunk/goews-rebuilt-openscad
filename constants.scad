@@ -134,6 +134,15 @@ bolt_head_cutout_radius = 7.5;
 // Bolt head cutout offset from center for the outer profile
 bolt_head_cutout_offset = 14.175;
 
+// Bolt head types
+bolt_head_type_original = 0;
+bolt_head_type_round = 1;
+
+// Bolt head recess types
+bolt_head_recess_type_hex = 0;
+bolt_head_recess_type_slot = 1;
+bolt_head_recess_type_philips_2 = 2;
+bolt_head_recess_type_philips_3 = 3;
 
 // Variant definitions
 variant_original = 0;
