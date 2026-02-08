@@ -24,6 +24,9 @@ hanger_bolt_notch_head_clearance_diameter = 20;
 // Hanger plate offset (thicker cleats only)
 hanger_offset = 0.75;
 
+// Cleat offset (thicker cleats only)
+cleat_offset = 1;
+
 // Nominal plate width
 plate_width = 42;
 

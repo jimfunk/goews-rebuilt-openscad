@@ -10,7 +10,7 @@ module tile_cleat(variant=variant_original) {
         translate([0, 0, tile_hanger_cleat_width])
             union() {
                 if (variant == variant_thicker_cleats) {
-                    linear_extrude(height = hanger_offset)
+                    linear_extrude(height = cleat_offset)
                         square([tile_hanger_cleat_width, tile_hanger_cleat_lower_height + tile_hanger_cleat_width]);
                 }
                 rotate([270, 0, 0])
@@ -23,7 +23,7 @@ module tile_cleat(variant=variant_original) {
                             ]
                         );
             }
-        linear_extrude(height = tile_hanger_cleat_width + hanger_offset)
+        linear_extrude(height = tile_hanger_cleat_width + cleat_offset)
             polygon(
                 points = [
                     [0, tile_hanger_cleat_lower_height + tile_hanger_cleat_width],
@@ -71,7 +71,7 @@ module hex_tile_single(
     fill_right=false
 ) {
     rear_cleat_thickness = variant == variant_original ? tile_hanger_rear_cleat_thickness : 0;
-    cleat_additional_thickness = variant == variant_thicker_cleats ? hanger_offset : 0;
+    cleat_additional_thickness = variant == variant_thicker_cleats ? cleat_offset : 0;
     hanger_x_offset = (tile_width - tile_hanger_width) / 2;
     tile_hanger_y_offset = tile_triangle_height;
     threaded_hole_center_x = tile_width / 2;
@@ -571,7 +571,7 @@ module grid_tile_single(
     mounting_hole_countersink_depth=2
 ) {
     rear_cleat_thickness = variant == variant_original ? tile_hanger_rear_cleat_thickness : 0;
-    cleat_additional_thickness = variant == variant_thicker_cleats ? hanger_offset : 0;
+    cleat_additional_thickness = variant == variant_thicker_cleats ? cleat_offset : 0;
     hanger_x_offset = (tile_width - tile_hanger_width) / 2;
     threaded_hole_center_x = tile_width / 2;
     threaded_hole_center_y = grid_hanger_y_offset + tile_hanger_height + tile_threaded_hole_y_offset_from_hanger_top;
