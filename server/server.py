@@ -4,7 +4,9 @@ Web-based GOEWS model generator
 
 from pathlib import Path
 from sanic import Sanic, response
-from sanic_ext import openapi
+from sanic_ext import Extend, openapi
+
+from server.api import api_bp
 
 
 top_dir = (Path(__file__) / "../..").resolve()
@@ -13,6 +15,12 @@ assets_dir = frontend_dir / "assets"
 
 
 app = Sanic("GOEWS")
+Extend(app)
+
+app.config.OPENAPI_URI = "/docs/openapi.json"
+app.config.OPENAPI_INFO_TITLE = "GOEWS Builder API"
+app.config.OPENAPI_INFO_VERSION = "1.0.0"
+app.config.OPENAPI_INFO_DESCRIPTION = "Parametric GOEWS part generator"
 
 
 app.static("/assets/", assets_dir)
@@ -30,11 +38,15 @@ import server.parts.bin
 import server.parts.bolt
 import server.parts.cableclip
 import server.parts.cup
+import server.parts.gridfinity_bin
 import server.parts.hook
 import server.parts.mount
 import server.parts.tile
 import server.parts.rack
 import server.parts.shelf
+
+# Register the blueprint after routes are added
+app.blueprint(api_bp)
 
 
 if __name__ == "__main__":

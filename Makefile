@@ -44,11 +44,9 @@ FRONTEND_SOURCES = \
 OPENSCAD = openscad
 OPENSCAD_ARGS = --backend manifold
 
-MAIN_SCAD = GOEWS.scad
-
 BUILD_DIR = build
 
-all: tiles grid-tiles bolts hooks shelves hole-shelves slot-shelves bins cups
+all: tiles grid-tiles bolts hooks shelves hole-shelves slot-shelves bins gridfinity-bins cups
 .PHONY: all
 
 $(BUILD_DIR):
@@ -88,20 +86,19 @@ TILES = $(foreach size,$(TILE_SIZES), \
 tiles: $(TILES)
 .PHONY: tiles
 
-$(BUILD_DIR)/tile-%.stl: $(MAIN_SCAD) $(BUILD_DIR)
+$(BUILD_DIR)/tile-%.stl: tile.scad $(BUILD_DIR)
 	$(eval VARIANT_NAME := $(word 1,$(subst -, ,$*)))
 	$(eval VARIANT_NUM := $(shell echo $(VARIANT_NAME) | awk '{if ($$1 == "original") print 0; else print 1;}'))
 	$(eval SIZE := $(word 2,$(subst -, ,$*)))
 	$(eval TILE_COLUMNS := $(word 1,$(subst x, ,$(SIZE))))
 	$(eval TILE_ROWS := $(word 2,$(subst x, ,$(SIZE))))
 	$(eval FILL_SUFFIX := $(word 3,$(subst -, ,$*)))  # Extract fill suffix (if any)
-	$(eval FILL_PARAMS := $(if $(FILL_SUFFIX),$(shell echo $(FILL_SUFFIX) | awk '{gsub("_"," "); for(i=1;i<=NF;i++) print "tile_fill_" $$i "=true"}'),))
+	$(eval FILL_PARAMS := $(if $(FILL_SUFFIX),$(shell echo $(FILL_SUFFIX) | awk '{gsub("_"," "); for(i=1;i<=NF;i++) print "fill_" $$i "=true"}'),))
 	$(OPENSCAD) $(OPENSCAD_ARGS) \
-		-o $@ $(MAIN_SCAD) \
-		-D 'part=$(PART_TILE)' \
+		-o $@ tile.scad \
 		-D 'variant=$(VARIANT_NUM)' \
-		-D 'tile_columns=$(TILE_COLUMNS)' \
-		-D 'tile_rows=$(TILE_ROWS)' \
+		-D 'columns=$(TILE_COLUMNS)' \
+		-D 'rows=$(TILE_ROWS)' \
 		$(foreach param,$(FILL_PARAMS),-D '$(param)')
 
 
@@ -114,7 +111,7 @@ GRID_TILES = $(foreach size,$(TILE_SIZES), \
 			) \
 		)
 
-$(BUILD_DIR)/tile-grid-%.stl: $(MAIN_SCAD) $(BUILD_DIR)
+$(BUILD_DIR)/tile-grid-%.stl: grid_tile.scad $(BUILD_DIR)
 	$(eval VARIANT_NAME := $(word 1,$(subst -, ,$*)))
 	$(eval VARIANT_NUM := $(shell echo $(VARIANT_NAME) | awk '{if ($$1 == "original") print 0; else print 1;}'))
 	$(eval SIZE := $(word 2,$(subst -, ,$*)))
@@ -123,11 +120,10 @@ $(BUILD_DIR)/tile-grid-%.stl: $(MAIN_SCAD) $(BUILD_DIR)
 	$(eval FILL_SUFFIX := $(word 3,$(subst -, ,$*)))  # Extract fill suffix (if any)
 	$(eval FILL_PARAMS := $(if $(FILL_SUFFIX),$(shell echo $(FILL_SUFFIX) | awk '{gsub("_"," "); for(i=1;i<=NF;i++) print "tile_fill_" $$i "=true"}'),))
 	$(OPENSCAD) $(OPENSCAD_ARGS) \
-		-o $@ $(MAIN_SCAD) \
-		-D 'part=$(PART_GRID_TILE)' \
+		-o $@ grid_tile.scad \
 		-D 'variant=$(VARIANT_NUM)' \
-		-D 'tile_columns=$(TILE_COLUMNS)' \
-		-D 'tile_rows=$(TILE_ROWS)' \
+		-D 'columns=$(TILE_COLUMNS)' \
+		-D 'rows=$(TILE_ROWS)' \
 		$(foreach param,$(FILL_PARAMS),-D '$(param)')
 
 
@@ -137,25 +133,22 @@ grid-tiles: $(GRID_TILES)
 #
 # Bolts
 #
-PART_BOLT = 2
 BOLT_LENGTHS= 9 16
 BOLTS = $(foreach length,$(BOLT_LENGTHS),$(BUILD_DIR)/bolt-$(length).stl)
 
 bolts: $(BOLTS)
 .PHONY: bolts
 
-$(BUILD_DIR)/bolt-%.stl: $(MAIN_SCAD) $(BUILD_DIR)
+$(BUILD_DIR)/bolt-%.stl: bolt.scad $(BUILD_DIR)
 	$(eval LENGTH := $(word 1,$(subst -, ,$*)))
 	$(OPENSCAD) $(OPENSCAD_ARGS) \
-		-o $@ $(MAIN_SCAD) \
-		-D 'part=$(PART_BOLT)' \
-		-D 'bolt_length=$(LENGTH)'
+		-o $@ bolt.scad \
+		-D 'length=$(LENGTH)'
 
 
 #
 # Hooks
 #
-PART_HOOK = 1
 HOOK_SIZES= 10x10 10x20 10x30 10x40 10x50 10x60 20x10 20x20 20x30 20x40 20x50 20x60 20x70 20x80
 HOOKS = $(foreach size,$(HOOK_SIZES), \
 			$(foreach variant,$(VARIANTS), \
@@ -166,24 +159,23 @@ HOOKS = $(foreach size,$(HOOK_SIZES), \
 hooks: $(HOOKS)
 .PHONY: hooks
 
-$(BUILD_DIR)/hook-%.stl: $(MAIN_SCAD) $(BUILD_DIR)
+$(BUILD_DIR)/hook-%.stl: hook.scad $(BUILD_DIR)
 	$(eval VARIANT_NAME := $(word 1,$(subst -, ,$*)))
 	$(eval VARIANT_NUM := $(shell echo $(VARIANT_NAME) | awk '{if ($$1 == "original") print 0; else print 1;}'))
 	$(eval SIZE := $(word 2,$(subst -, ,$*)))
 	$(eval HOOK_WIDTH := $(word 1,$(subst x, ,$(SIZE))))
 	$(eval HOOK_SHANK_LENGTH := $(word 2,$(subst x, ,$(SIZE))))
 	$(OPENSCAD) $(OPENSCAD_ARGS) \
-		-o $@ $(MAIN_SCAD) \
-		-D 'part=$(PART_HOOK)' \
+		-o $@ hook.scad \
 		-D 'variant=$(VARIANT_NUM)' \
-		-D 'hook_width=$(HOOK_WIDTH)' \
-		-D 'hook_shank_length=$(HOOK_SHANK_LENGTH)'
+		-D 'hooks=1' \
+		-D 'width=$(HOOK_WIDTH)' \
+		-D 'shank_length=$(HOOK_SHANK_LENGTH)'
 
 
 #
 # Shelves
 #
-PART_SHELF = 5
 SHELF_SIZES = 83.5x30 83.5x60 125.5x30 125.5x60
 SHELVES = $(foreach size,$(SHELF_SIZES), \
 			$(foreach variant,$(VARIANTS), \
@@ -194,24 +186,22 @@ SHELVES = $(foreach size,$(SHELF_SIZES), \
 shelves: $(SHELVES)
 .PHONY: shelves
 
-$(BUILD_DIR)/shelf-%.stl: $(MAIN_SCAD) $(BUILD_DIR)
+$(BUILD_DIR)/shelf-%.stl: shelf.scad $(BUILD_DIR)
 	$(eval VARIANT_NAME := $(word 1,$(subst -, ,$*)))
 	$(eval VARIANT_NUM := $(shell echo $(VARIANT_NAME) | awk '{if ($$1 == "original") print 0; else print 1;}'))
 	$(eval SIZE := $(word 2,$(subst -, ,$*)))
 	$(eval WIDTH := $(word 1,$(subst x, ,$(SIZE))))
 	$(eval DEPTH := $(word 2,$(subst x, ,$(SIZE))))
 	$(OPENSCAD) $(OPENSCAD_ARGS) \
-		-o $@ $(MAIN_SCAD) \
-		-D 'part=$(PART_SHELF)' \
+		-o $@ shelf.scad \
 		-D 'variant=$(VARIANT_NUM)' \
-		-D 'shelf_width=$(WIDTH)' \
-		-D 'shelf_depth=$(DEPTH)'
+		-D 'width=$(WIDTH)' \
+		-D 'depth=$(DEPTH)'
 
 
 #
 # Hole shelves
 #
-PART_HOLE_SHELF = 6
 HOLE_SHELF_SIZES = 1x3 1x5 1x8 2x3 2x5 2x8
 HOLE_SHELVES = $(foreach size,$(HOLE_SHELF_SIZES), \
 			$(foreach variant,$(VARIANTS), \
@@ -222,24 +212,22 @@ HOLE_SHELVES = $(foreach size,$(HOLE_SHELF_SIZES), \
 hole-shelves: $(HOLE_SHELVES)
 .PHONY: hole-shelves
 
-$(BUILD_DIR)/hole-shelf-%.stl: $(MAIN_SCAD) $(BUILD_DIR)
+$(BUILD_DIR)/hole-shelf-%.stl: hole_shelf.scad $(BUILD_DIR)
 	$(eval VARIANT_NAME := $(word 1,$(subst -, ,$*)))
 	$(eval VARIANT_NUM := $(shell echo $(VARIANT_NAME) | awk '{if ($$1 == "original") print 0; else print 1;}'))
 	$(eval SIZE := $(word 2,$(subst -, ,$*)))
 	$(eval ROWS := $(word 1,$(subst x, ,$(SIZE))))
 	$(eval COLUMNS := $(word 2,$(subst x, ,$(SIZE))))
 	$(OPENSCAD) $(OPENSCAD_ARGS) \
-		-o $@ $(MAIN_SCAD) \
-		-D 'part=$(PART_HOLE_SHELF)' \
+		-o $@ hole_shelf.scad \
 		-D 'variant=$(VARIANT_NUM)' \
-		-D 'hole_shelf_rows=$(ROWS)' \
-		-D 'hole_shelf_columns=$(COLUMNS)'
+		-D 'rows=$(ROWS)' \
+		-D 'columns=$(COLUMNS)'
 
 
 #
 # Slot shelves
 #
-PART_SLOT_SHELF = 7
 SLOT_SHELF_SIZES = 10x40x4 10x40x8 20x60x4 20x60x8
 SLOT_SHELVES = $(foreach size,$(SLOT_SHELF_SIZES), \
 			$(foreach variant,$(VARIANTS), \
@@ -250,7 +238,7 @@ SLOT_SHELVES = $(foreach size,$(SLOT_SHELF_SIZES), \
 slot-shelves: $(SLOT_SHELVES)
 .PHONY: slot-shelves
 
-$(BUILD_DIR)/slot-shelf-%.stl: $(MAIN_SCAD) $(BUILD_DIR)
+$(BUILD_DIR)/slot-shelf-%.stl: slot_shelf.scad $(BUILD_DIR)
 	$(eval VARIANT_NAME := $(word 1,$(subst -, ,$*)))
 	$(eval VARIANT_NUM := $(shell echo $(VARIANT_NAME) | awk '{if ($$1 == "original") print 0; else print 1;}'))
 	$(eval SIZE := $(word 2,$(subst -, ,$*)))
@@ -258,18 +246,16 @@ $(BUILD_DIR)/slot-shelf-%.stl: $(MAIN_SCAD) $(BUILD_DIR)
 	$(eval LENGTH := $(word 2,$(subst x, ,$(SIZE))))
 	$(eval SLOTS := $(word 3,$(subst x, ,$(SIZE))))
 	$(OPENSCAD) $(OPENSCAD_ARGS) \
-		-o $@ $(MAIN_SCAD) \
-		-D 'part=$(PART_SLOT_SHELF)' \
+		-o $@ slot_shelf.scad \
 		-D 'variant=$(VARIANT_NUM)' \
-		-D 'slot_shelf_slot_width=$(WIDTH)' \
-		-D 'slot_shelf_slot_length=$(LENGTH)' \
-		-D 'slot_shelf_slots=$(SLOTS)'
+		-D 'slot_width=$(WIDTH)' \
+		-D 'slot_length=$(LENGTH)' \
+		-D 'slots=$(SLOTS)'
 
 
 #
 # Bins
 #
-PART_BIN = 8
 BIN_SIZES = \
 	41.5x41.5x20 \
 	41.5x41.5x42 \
@@ -288,26 +274,57 @@ BINS = $(foreach size,$(BIN_SIZES), \
 bins: $(BINS)
 .PHONY: bins
 
-$(BUILD_DIR)/bin-%.stl: $(MAIN_SCAD) $(BUILD_DIR)
+$(BUILD_DIR)/bin-%.stl: bin.scad $(BUILD_DIR)
 	$(eval VARIANT_NAME := $(word 1,$(subst -, ,$*)))
 	$(eval VARIANT_NUM := $(shell echo $(VARIANT_NAME) | awk '{if ($$1 == "original") print 0; else print 1;}'))
 	$(eval SIZE := $(word 2,$(subst -, ,$*)))
 	$(eval WIDTH := $(word 1,$(subst x, ,$(SIZE))))
-	$(eval DEPTH` := $(word 2,$(subst x, ,$(SIZE))))
+	$(eval DEPTH := $(word 2,$(subst x, ,$(SIZE))))
 	$(eval HEIGHT := $(word 3,$(subst x, ,$(SIZE))))
 	$(OPENSCAD) $(OPENSCAD_ARGS) \
-		-o $@ $(MAIN_SCAD) \
-		-D 'part=$(PART_BIN)' \
+		-o $@ bin.scad \
 		-D 'variant=$(VARIANT_NUM)' \
-		-D 'bin_width=$(WIDTH)' \
-		-D 'bin_depth=$(DEPTH`)' \
-		-D 'bin_height=$(HEIGHT)'
+		-D 'width=$(WIDTH)' \
+		-D 'depth=$(DEPTH)' \
+		-D 'height=$(HEIGHT)'
+
+
+#
+# Gridfinity bins
+#
+GRIDFINITY_BIN_X = 1 2 3 4 5 6
+GRIDFINITY_BIN_Y = 1 2 3 4 5 6
+GRIDFINITY_BIN_Z = 3 4 5 6 7
+
+GRIDFINITY_BIN_SIZES = $(foreach x,$(GRIDFINITY_BIN_X),$(foreach y,$(GRIDFINITY_BIN_Y),$(foreach z,$(GRIDFINITY_BIN_Z),$(x)x$(y)x$(z))))
+
+GRIDFINITY_BINS = $(foreach size,$(GRIDFINITY_BIN_SIZES), \
+			$(foreach variant,$(VARIANTS), \
+				$(BUILD_DIR)/gridfinity-bin-$(variant)-$(size).stl \
+			) \
+		)
+
+gridfinity-bins: $(GRIDFINITY_BINS)
+.PHONY: gridfinity-bins
+
+$(BUILD_DIR)/gridfinity-bin-%.stl: gridfinity_bin.scad $(BUILD_DIR)
+	$(eval VARIANT_NAME := $(word 1,$(subst -, ,$*)))
+	$(eval VARIANT_NUM := $(shell echo $(VARIANT_NAME) | awk '{if ($$1 == "original") print 0; else print 1;}'))
+	$(eval SIZE := $(word 2,$(subst -, ,$*)))
+	$(eval GRIDX := $(word 1,$(subst x, ,$(SIZE))))
+	$(eval GRIDY := $(word 2,$(subst x, ,$(SIZE))))
+	$(eval GRIDZ := $(word 3,$(subst x, ,$(SIZE))))
+	$(OPENSCAD) $(OPENSCAD_ARGS) \
+		-o $@ gridfinity_bin.scad \
+		-D 'variant=$(VARIANT_NUM)' \
+		-D 'bin_gridx=$(GRIDX)' \
+		-D 'bin_gridy=$(GRIDY)' \
+		-D 'bin_gridz=$(GRIDZ)'
 
 
 #
 # Cups
 #
-PART_CUP = 9
 CUP_SIZES = 37.5x20 37.5x42
 CUPS = $(foreach size,$(CUP_SIZES), \
 			$(foreach variant,$(VARIANTS), \
@@ -318,18 +335,17 @@ CUPS = $(foreach size,$(CUP_SIZES), \
 cups: $(CUPS)
 .PHONY: cups
 
-$(BUILD_DIR)/cup-%.stl: $(MAIN_SCAD) $(BUILD_DIR)
+$(BUILD_DIR)/cup-%.stl: cup.scad $(BUILD_DIR)
 	$(eval VARIANT_NAME := $(word 1,$(subst -, ,$*)))
 	$(eval VARIANT_NUM := $(shell echo $(VARIANT_NAME) | awk '{if ($$1 == "original") print 0; else print 1;}'))
 	$(eval SIZE := $(word 2,$(subst -, ,$*)))
 	$(eval INNER_DIAMETER := $(word 1,$(subst x, ,$(SIZE))))
 	$(eval HEIGHT := $(word 2,$(subst x, ,$(SIZE))))
 	$(OPENSCAD) $(OPENSCAD_ARGS) \
-		-o $@ $(MAIN_SCAD) \
-		-D 'part=$(PART_CUP)' \
+		-o $@ cup.scad \
 		-D 'variant=$(VARIANT_NUM)' \
-		-D 'cup_inner_diameter=$(INNER_DIAMETER)' \
-		-D 'cup_height=$(HEIGHT)'
+		-D 'inner_diameter=$(INNER_DIAMETER)' \
+		-D 'height=$(HEIGHT)'
 
 
 #

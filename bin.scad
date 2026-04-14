@@ -5,6 +5,44 @@ include <constants.scad>
 use <hanger.scad>
 
 
+/* [Primary parameters] */
+// Which variant to use
+variant = 0; // [0: Original, 1: Thicker cleats]
+
+// Added to hangers to allow for easier insertion and removal. This can be reduced to make hanger plates tighter to the tile. It reduces the tilt but makes them harder to insert and remove
+hanger_tolerance = 0.15;
+
+/* [Bin parameters] */
+// Bin width in mm
+width = 41.5;
+
+// Bin depth in mm
+depth = 41.5;
+
+// Bin height in mm
+height = 20;
+
+// Bin wall thickness in mm
+wall_thickness = 1;
+
+// Bin bottom thickness in mm
+bottom_thickness = 2;
+
+// Bin lip thickness in mm
+lip_thickness = 1;
+
+// Bin inner rounding in mm
+inner_rounding = 1;
+
+// Bin outer rounding in mm
+outer_rounding = 0.5;
+
+
+/* [Hidden] */
+$fa=0.5;
+$fs=0.5;
+
+
 module bin(
     width=41.5,
     depth=41.5,
@@ -76,3 +114,17 @@ module bin(
         }
     }
 }
+
+
+bin(
+    width=width,
+    depth=depth,
+    height=height,
+    wall_thickness=wall_thickness,
+    bottom_thickness=bottom_thickness,
+    lip_thickness=lip_thickness,
+    inner_rounding=inner_rounding,
+    outer_rounding=outer_rounding,
+    hanger_tolerance=hanger_tolerance,
+    variant=variant
+);

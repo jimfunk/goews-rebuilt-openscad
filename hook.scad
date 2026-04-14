@@ -4,6 +4,47 @@ include <constants.scad>
 use <hanger.scad>
 
 
+/* [Primary parameters] */
+// Which variant to use
+variant = 0; // [0: Original, 1: Thicker cleats]
+
+// Added to hangers to allow for easier insertion and removal. This can be reduced to make hanger plates tighter to the tile. It reduces the tilt but makes them harder to insert and remove
+hanger_tolerance = 0.15;
+
+/* [Hook parameters] */
+// Number of hooks
+hooks = 1;
+
+// Hook width in mm
+width = 10;
+
+// Gap between hooks when there is more than one
+gap = 10;
+
+// Hook shank length in mm
+shank_length = 10;
+
+// Hook shank thickness in mm
+shank_thickness = 8;
+
+// Hook post height in mm
+post_height = 18;
+
+// Hook post thickness in mm
+post_thickness = 6;
+
+// Hook rounding on the outer corners in mm
+rounding = 0.5;
+
+// Add a lip on top of the hook post. Set to 0 to disable
+lip_thickness = 0;
+
+
+/* [Hidden] */
+$fa=0.5;
+$fs=0.5;
+
+
 module hook(
     width=10,
     shank_length=10,
@@ -78,3 +119,18 @@ module hook(
         }
     }
 }
+
+
+hook(
+    hooks=hooks,
+    width=width,
+    gap=gap,
+    shank_length=shank_length,
+    shank_thickness=shank_thickness,
+    post_height=post_height,
+    post_thickness=post_thickness,
+    lip_thickness=lip_thickness,
+    rounding=rounding,
+    hanger_tolerance=hanger_tolerance,
+    variant=variant
+);

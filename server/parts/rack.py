@@ -1,50 +1,72 @@
 from pydantic import BaseModel, Field
-from sanic import Sanic, response
+from sanic import Blueprint, response
 from sanic.request import Request
 from sanic_ext import openapi, validate
 from typing import Annotated
 
 from server.openscad import build
-from server.enums import Part, Variant
+from server.enums import Variant
+from server.api import api_bp
 
 
-app = Sanic.get_app()
-
-
+@openapi.component
 class RackDefinition(BaseModel):
-    slots: Annotated[int, Field(gt=0)] = 7
-    slot_width: Annotated[float, Field(gt=0)] = 6
-    divider_width: Annotated[float, Field(gt=0)] = 10
-    divider_length: Annotated[float, Field(gt=0)] = 80
-    divider_thickness: Annotated[float, Field(gt=0)] = 6
-    lip: bool = False
-    lip_height: float = 8
-    lip_thickness: float = 4
-    rounding: float = 0.5
+    slots: Annotated[int, Field(gt=0, description="Number of slots")] = 7
+    slot_width: Annotated[float, Field(gt=0, description="Width of each slot in mm")] = 6
+    divider_width: Annotated[float, Field(gt=0, description="Width of dividers in mm")] = 10
+    divider_length: Annotated[float, Field(gt=0, description="Length of the dividers in mm")] = 80
+    divider_thickness: Annotated[float, Field(gt=0, description="Thickness of the dividers in mm")] = 6
+    lip: Annotated[bool, Field(description="Include lip at front of dividers")] = False
+    lip_height: Annotated[float, Field(description="Height of the lip in mm")] = 8
+    lip_thickness: Annotated[float, Field(description="Thickness of the lip in mm")] = 4
+    rounding: Annotated[float, Field(description="Rounding of outer corners in mm")] = 0.5
     hanger_tolerance: Annotated[float, Field(ge=0)] = 0.15
-    variant: Variant = Variant.Original
+    variant: Variant = Variant.ORIGINAL
 
 
-@app.post("/api/rack")
-@validate(json=RackDefinition)
-@openapi.body(RackDefinition, required=True)
-@openapi.response(200, {"model/stl": bytes})
+def make_rack_filename(body: RackDefinition) -> str:
+    parts = ["rack", f"{body.slots}slot"]
+    parts.append("original" if body.variant.to_int() == 0 else "thicker_cleats")
+    
+    options = []
+    for name, info in type(body).model_fields.items():
+        if name in ("slots", "variant"):
+            continue
+        val = getattr(body, name)
+        if val != info.default:
+            if isinstance(val, bool):
+                options.append(name)
+            else:
+                options.append(f"{name}_{val}")
+    
+    if options:
+        parts.append("_".join(options))
+    
+    return "-".join(parts) + ".stl"
+
+
+@api_bp.post("/rack")
+@openapi.body(RackDefinition)
+@openapi.response(200, "model/stl")
 @openapi.description("Create a GOEWS rack")
+@validate(json=RackDefinition)
 async def rack(request: Request, body: RackDefinition):
+    filename = make_rack_filename(body)
     return response.raw(
         await build(
-            part=Part.Rack,
+            "rack.scad",
             hanger_tolerance=body.hanger_tolerance,
-            variant=body.variant,
-            rack_slots=body.slots,
-            rack_slot_width=body.slot_width,
-            rack_divider_width=body.divider_width,
-            rack_divider_length=body.divider_length,
-            rack_divider_thickness=body.divider_thickness,
-            rack_lip=body.lip,
-            rack_lip_height=body.lip_height,
-            rack_lip_thickness=body.lip_thickness,
-            rack_slot_rounding=body.rounding,
+            variant=body.variant.to_int(),
+            slots=body.slots,
+            slot_width=body.slot_width,
+            divider_width=body.divider_width,
+            divider_length=body.divider_length,
+            divider_thickness=body.divider_thickness,
+            lip=body.lip,
+            lip_height=body.lip_height,
+            lip_thickness=body.lip_thickness,
+            rounding=body.rounding,
         ),
         content_type="model/stl",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )

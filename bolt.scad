@@ -6,6 +6,34 @@ include <BOSL2/threading.scad>
 include <constants.scad>
 
 
+/* [Primary parameters] */
+// Bolt length in mm
+length = 9;
+
+// Bolt head type
+head_type = 0; // [0: Original, 1: Round]
+
+// Bolt head recess type
+head_recess_type = 0; // [0: Hex, 1: Slot, 2: Philips #2, 3: Philips #3]
+
+// Recess depth. If 0 a default based on the type will be used
+head_recess_depth = 0;
+
+// Bolt socket recess width in mm
+hex_socket_width = 8.4;
+
+// Width of bolt slot recess
+slot_recess_width = 2;
+
+// Length of bolt slot recess
+slot_recess_length = 10;
+
+
+/* [Hidden] */
+$fa=0.5;
+$fs=0.5;
+
+
 default_phillips_2_depth = 4.429;
 default_phillips_3_depth = 5.314;
 
@@ -101,3 +129,14 @@ module bolt(
         }
     }
 }
+
+
+bolt(
+    length=length,
+    head_type=head_type,
+    head_recess_type=head_recess_type,
+    head_recess_depth=head_recess_depth,
+    hex_socket_width=hex_socket_width,
+    slot_recess_width=slot_recess_width,
+    slot_recess_length=slot_recess_length
+);

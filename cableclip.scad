@@ -4,6 +4,47 @@ include <constants.scad>
 use <hanger.scad>
 
 
+/* [Primary parameters] */
+// Which variant to use
+variant = 0; // [0: Original, 1: Thicker cleats]
+
+// Added to hangers to allow for easier insertion and removal. This can be reduced to make hanger plates tighter to the tile. It reduces the tilt but makes them harder to insert and remove
+hanger_tolerance = 0.15;
+
+/* [Cable clip parameters] */
+// Orientation of the clip
+orientation = cable_clip_orientation_vertical;
+
+// Diameter of the cable in mm
+cable_diameter = 5;
+
+// Width of the clip in mm
+width = 6;
+
+// Height of the clip in mm, not including the base thickness
+height = 8;
+
+// Thickness of the clip in mm
+thickness = 3;
+
+// Thickness of the lip in mm
+lip_thickness = 2;
+
+// Rounding of the clip in mm
+rounding = 0.5;
+
+// Number of clips to make
+clips = 1;
+
+// Gap between clips in mm
+gap = 10;
+
+
+/* [Hidden] */
+$fa=0.5;
+$fs=0.5;
+
+
 module clip(
     cable_diameter,
     width,
@@ -116,3 +157,18 @@ module cableclip(
         }
     }
 }
+
+
+cableclip(
+    orientation=orientation,
+    cable_diameter=cable_diameter,
+    width=width,
+    height=height,
+    thickness=thickness,
+    lip_thickness=lip_thickness,
+    rounding=rounding,
+    clips=clips,
+    gap=gap,
+    hanger_tolerance=hanger_tolerance,
+    variant=variant
+);

@@ -4,6 +4,47 @@ include <constants.scad>
 use <hanger.scad>
 
 
+/* [Primary parameters] */
+// Which variant to use
+variant = 0; // [0: Original, 1: Thicker cleats]
+
+// Added to hangers to allow for easier insertion and removal. This can be reduced to make hanger plates tighter to the tile. It reduces the tilt but makes them harder to insert and remove
+hanger_tolerance = 0.15;
+
+/* [Rack parameters] */
+// Number of slots in the rack
+slots = 7;
+
+// Slot width in mm
+slot_width = 6;
+
+// Divider width in mm
+divider_width = 10;
+
+// Divider length in mm
+divider_length = 80;
+
+// Divider thickness in mm
+divider_thickness = 6;
+
+// Whether to include a lip at the front of the dividers
+lip = false;
+
+// Lip height in mm
+lip_height = 8;
+
+// Lip thickness in mm
+lip_thickness = 4;
+
+// Rounding on the outer corners of the divider and lip in mm
+rounding = 0.5;
+
+
+/* [Hidden] */
+$fa=0.5;
+$fs=0.5;
+
+
 module rack(
     slots=7,
     slot_width=6,
@@ -71,3 +112,18 @@ module rack(
         }
     }
 }
+
+
+rack(
+    slots=slots,
+    slot_width=slot_width,
+    divider_width=divider_width,
+    divider_length=divider_length,
+    divider_thickness=divider_thickness,
+    lip=lip,
+    lip_height=lip_height,
+    lip_thickness=lip_thickness,
+    rounding=rounding,
+    hanger_tolerance=hanger_tolerance,
+    variant=variant
+);

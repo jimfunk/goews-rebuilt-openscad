@@ -1,4 +1,4 @@
 async-lru~=2.0.5
 pydantic~=2.11.4
-sanic~=25.3.0
-sanic-ext~=24.12.0
+sanic~=25.12.0
+sanic-ext~=25.12.0

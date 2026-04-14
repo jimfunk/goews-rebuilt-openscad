@@ -1,22 +1,12 @@
-from enum import IntEnum
+from enum import StrEnum
+from sanic_ext import openapi
 
 
-class Part(IntEnum):
-    Tile = 0
-    Hook = 1
-    Bolt = 2
-    Rack = 3
-    GridTile = 4
-    Shelf = 5
-    HoleShelf = 6
-    SlotShelf = 7
-    Bin = 8
-    Cup = 9
-    GridfinityShelf = 10
-    HangerMount = 11
-    CableClip = 12
+@openapi.component
+class Variant(StrEnum):
+    ORIGINAL = "Original"
+    THICKER_CLEATS = "Thicker Cleats"
 
-
-class Variant(IntEnum):
-    Original = 0
-    ThickerCleats = 1
+    def to_int(self) -> int:
+        """Convert to integer for OpenSCAD compatibility."""
+        return 0 if self == self.ORIGINAL else 1

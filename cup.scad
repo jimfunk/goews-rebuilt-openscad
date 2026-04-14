@@ -5,6 +5,38 @@ include <constants.scad>
 use <hanger.scad>
 
 
+/* [Primary parameters] */
+// Which variant to use
+variant = 0; // [0: Original, 1: Thicker cleats]
+
+// Added to hangers to allow for easier insertion and removal. This can be reduced to make hanger plates tighter to the tile. It reduces the tilt but makes them harder to insert and remove
+hanger_tolerance = 0.15;
+
+/* [Cup parameters] */
+// Inner diameter in mm
+inner_diameter = 37.5;
+
+// Height in mm
+height = 24.39;
+
+// Wall thickness in mm
+wall_thickness = 2;
+
+// Bottom thickness in mm
+bottom_thickness = 2;
+
+// Inner rounding in mm
+inner_rounding = 0.5;
+
+// Outer rounding in mm
+outer_rounding = 0.5;
+
+
+/* [Hidden] */
+$fa=0.5;
+$fs=0.5;
+
+
 module cup(
     inner_diameter=37.5,
     height=24.39,
@@ -65,3 +97,15 @@ module cup(
         }
     }
 }
+
+
+cup(
+    inner_diameter=inner_diameter,
+    height=height,
+    wall_thickness=wall_thickness,
+    bottom_thickness=bottom_thickness,
+    inner_rounding=inner_rounding,
+    outer_rounding=outer_rounding,
+    hanger_tolerance=hanger_tolerance,
+    variant=variant
+);
