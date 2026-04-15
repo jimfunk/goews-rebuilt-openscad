@@ -56,7 +56,7 @@ module cup(
     x_offset = get_hanger_plate_width(rear_width) / 2;
     y_offset = plate_total_thickness + outer_diameter / 2;
 
-    cutout = height > (plate_height - bolt_head_cutout_offset) ? false : true;
+    bolt_notch = height > (plate_height - bolt_head_cutout_offset) ? false : true;
     plate_extend_bottom = height > plate_height ? height - plate_height : 0;
 
     union() {
@@ -65,7 +65,7 @@ module cup(
             hanger_units=get_hanger_units_from_width(rear_width),
             hanger_tolerance=hanger_tolerance,
             extend_bottom=plate_extend_bottom,
-            cutout=cutout
+            bolt_notch=bolt_notch
         );
 
 
