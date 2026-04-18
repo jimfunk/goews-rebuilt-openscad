@@ -10,11 +10,9 @@
 <div>
   <label for="global-variant" class="block text-gray-700 text-sm font-bold mb-2">Variant</label>
   <p class="text-gray-500 text-sm mb-2">
-    The original variant is compatible with legacy tiles and accessories.
-    The thicker cleats variant shifts the cleat profile back 1mm for 60% higher
-    weight capacity and 10% less filament usage. The two profiles are
-    mechanically incompatible. If starting a new deployment, the thicker cleats
-    variant is recommended.
+    Use original for compatibility with legacy tiles and accessories.
+    Use thicker cleats for 60% higher weight capacity and 10% less filament usage. The two variants are
+    not compatible with each other.
   </p>
   <select
     id="global-variant"

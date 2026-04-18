@@ -39,6 +39,7 @@ import server.parts.bolt
 import server.parts.cableclip
 import server.parts.cup
 import server.parts.gridfinity_bin
+import server.parts.gridfinity_shelf
 import server.parts.hook
 import server.parts.mount
 import server.parts.tile
