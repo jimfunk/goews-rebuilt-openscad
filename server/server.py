@@ -23,7 +23,8 @@ app.config.OPENAPI_INFO_VERSION = "1.0.0"
 app.config.OPENAPI_INFO_DESCRIPTION = "Parametric GOEWS part generator"
 
 
-app.static("/assets/", assets_dir)
+app.static("/assets/", assets_dir, name="assets")
+app.static("/favicon.svg", frontend_dir / "favicon.svg", name="favicon")
 
 
 @app.route("/")

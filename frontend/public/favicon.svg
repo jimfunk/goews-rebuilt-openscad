@@ -1,0 +1,13 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <mask id="hole-punch">
+      <path d="M16 2 L29 9.5 L29 22.5 L16 30 L3 22.5 L3 9.5 Z" fill="white" />
+
+      <path d="M16 14.5 A5 5 0 0 1 11.2 11 L7 11 L7 21 L25 21 L25 11 L20.8 11 A5 5 0 0 1 16 14.5 Z" fill="black" />
+      <circle cx="16" cy="10" r="3.5" fill="black" />
+      <circle cx="16" cy="26" r="1.5" fill="black" />
+    </mask>
+  </defs>
+
+  <rect width="32" height="32" fill="#466D98" mask="url(#hole-punch)" />
+</svg>
