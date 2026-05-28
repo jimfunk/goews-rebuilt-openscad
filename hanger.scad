@@ -107,7 +107,7 @@ module hanger_plate_unit(
                         }
                     }
                 }
-                if (bolt_notch)
+                if (bolt_notch && plate_thickness > bolt_notch_thickness)
                     translate([plate_width / 2, plate_cutout_y_offset + extend_bottom, bolt_notch_thickness])
                         cylinder(d=hanger_bolt_notch_head_clearance_diameter, h=plate_thickness - bolt_notch_thickness);
             }
@@ -142,7 +142,7 @@ module hanger_plate(
                         plate_thickness=plate_thickness,
                         hanger_tolerance=hanger_tolerance,
                         extend_bottom=extend_bottom,
-                        bolt_notch=bolt_notch,
+                        bolt_notch=bolt_notch
                     );
             }
         }
