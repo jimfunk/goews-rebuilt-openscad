@@ -54,6 +54,10 @@ skip_list = "";
 $fa=0.5;
 $fs=0.5;
 
+// Small boolean overcut to avoid coplanar faces / zero-thickness STL scraps.
+// These can show up in the browser preview as "filled" hanger windows even
+// though slicers usually discard them.
+bool_eps = 0.02;
 
 module tile_cleat(variant=variant_original) {
     difference() {
@@ -91,13 +95,24 @@ module mounting_hole(
     mounting_hole_inset_depth=1,
     mounting_hole_countersink_depth=2,
 ) {
-        cylinder(h=tile_thickness, d=mounting_hole_shank_diameter);
-        translate([0, 0, tile_thickness - mounting_hole_inset_depth])
-            cylinder(h=mounting_hole_inset_depth, d=mounting_hole_head_diameter);
-        if (mounting_hole_countersink_depth > 0) {
-            translate([0, 0, tile_thickness - mounting_hole_inset_depth])
-                zcyl(h=mounting_hole_countersink_depth, d1=mounting_hole_shank_diameter, d2=mounting_hole_head_diameter, anchor=TOP);
-        }
+    // Overcut each cutter slightly so the mounting hole does not leave
+    // coplanar scraps in the preview/STL. The overlaps are internal to the
+    // subtracted shape and do not meaningfully change the printed dimensions.
+    translate([0, 0, -bool_eps])
+        cylinder(h=tile_thickness + 2 * bool_eps, d=mounting_hole_shank_diameter);
+
+    translate([0, 0, tile_thickness - mounting_hole_inset_depth - bool_eps])
+        cylinder(h=mounting_hole_inset_depth + 2 * bool_eps, d=mounting_hole_head_diameter);
+
+    if (mounting_hole_countersink_depth > 0) {
+        translate([0, 0, tile_thickness - mounting_hole_inset_depth + bool_eps])
+            zcyl(
+                h=mounting_hole_countersink_depth + 2 * bool_eps,
+                d1=mounting_hole_shank_diameter,
+                d2=mounting_hole_head_diameter,
+                anchor=TOP
+            );
+    }
 }
 
 
@@ -184,14 +199,16 @@ module hex_tile_single(
                 }
             }
 
-        // Space for hanger
-        linear_extrude(height=tile_thickness)
-            difference() {
-                translate([hanger_x_offset, tile_hanger_y_offset, 0])
-                    square([tile_hanger_width, tile_hanger_height]);
-                translate([threaded_hole_center_x, threaded_hole_center_y, 0])
-                    circle(tile_hanger_hole_outer_diameter);
-            }
+	// Space for hanger
+	translate([0, 0, -bool_eps])
+	  linear_extrude(height=tile_thickness + 2 * bool_eps) difference() {
+	  difference() {
+	    translate([hanger_x_offset, tile_hanger_y_offset, 0])
+	      square([tile_hanger_width, tile_hanger_height]);
+	    translate([threaded_hole_center_x, threaded_hole_center_y, 0])
+	      circle(tile_hanger_hole_outer_diameter);
+	  }
+	}
 
         // Threaded hole
         translate([threaded_hole_center_x, threaded_hole_center_y, 0])
