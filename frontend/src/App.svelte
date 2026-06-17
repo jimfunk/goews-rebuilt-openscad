@@ -1,6 +1,6 @@
 <script>
   import { Canvas } from '@threlte/core';
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { getOpenAPISchema, extractParts, generateSTL, downloadSTL, generateBlob, downloadBlob, getDefaultValues, generateFilename } from '$lib/api.js';
   import PartTreeSelector from './components/PartTreeSelector.svelte';
   import ParameterForm from './components/ParameterForm.svelte';
@@ -13,6 +13,7 @@
   let globalVariant = $state('Original');
   let stlUrl = $state(null);
   let stlBlob = $state(null);
+  let previewModels = $state([]);
   let loading = $state(false);
   let errorMessage = $state(null);
   let initialized = $state(false);
@@ -20,8 +21,11 @@
   let generatedParameters = $state({});
   let generatedFilename = $state(null);
 
+  let previewObjectUrls = new Set();
+
   let isDirty = $derived(initialized && JSON.stringify(parameters) !== JSON.stringify(generatedParameters));
   let currentPart = $derived(selectedPartId ? parts[selectedPartId] : null);
+  let previewKey = $derived(previewModels.map((previewModel) => previewModel.model).join('|'));
 
   onMount(async () => {
     // Load saved variant from localStorage
@@ -62,6 +66,10 @@
     }
   });
 
+  onDestroy(() => {
+    clearPreviewUrls();
+  });
+
   // Save variant to localStorage when it changes
   $effect(() => {
     if (initialized) {
@@ -74,6 +82,81 @@
     if (selectedPartId && Object.keys(parameters).length > 0) {
       localStorage.setItem(`params:${selectedPartId}`, JSON.stringify(parameters));
     }
+  }
+
+  function clearPreviewUrls() {
+    for (const url of previewObjectUrls) {
+      URL.revokeObjectURL(url);
+    }
+
+    previewObjectUrls = new Set();
+    stlUrl = null;
+    stlBlob = null;
+    previewModels = [];
+  }
+
+  function createPreviewUrl(blob) {
+    const url = URL.createObjectURL(blob);
+    previewObjectUrls.add(url);
+    return url;
+  }
+
+  async function generatePreview(partToGenerate, paramsToGenerate) {
+    clearPreviewUrls();
+
+    if (partToGenerate.id === 'tile-stack') {
+      const [pla, petg] = await Promise.all([
+        generateSTL(partToGenerate.endpoint, {
+          ...paramsToGenerate,
+          part: 'pla',
+        }),
+        generateSTL(partToGenerate.endpoint, {
+          ...paramsToGenerate,
+          part: 'petg',
+        }),
+      ]);
+
+      const plaUrl = createPreviewUrl(pla.blob);
+      const petgUrl = createPreviewUrl(petg.blob);
+
+      previewModels = [
+        {
+          model: plaUrl,
+          color: '#2f5f9e',
+          name: 'PLA tiles',
+        },
+        {
+          model: petgUrl,
+          color: '#f5b400',
+          name: 'PETG spacers',
+        },
+      ];
+
+      stlBlob = pla.blob;
+      stlUrl = plaUrl;
+
+      return {
+        filename: pla.filename,
+      };
+    }
+
+    const { blob, filename } = await generateSTL(partToGenerate.endpoint, paramsToGenerate);
+    const url = createPreviewUrl(blob);
+
+    previewModels = [
+      {
+        model: url,
+        color: '#2f5f9e',
+        name: partToGenerate.name,
+      },
+    ];
+
+    stlBlob = blob;
+    stlUrl = url;
+
+    return {
+      filename,
+    };
   }
 
   // Auto-generate when part selection changes
@@ -101,8 +184,6 @@
       }
     }
 
-    stlUrl = null;
-    stlBlob = null;
     generatedFilename = null;
     generatedParameters = {};
 
@@ -112,10 +193,8 @@
     loading = true;
     errorMessage = null;
 
-    generateSTL(partToGenerate.endpoint, newParams)
-      .then(({ blob, filename }) => {
-        stlBlob = blob;
-        stlUrl = URL.createObjectURL(blob);
+    generatePreview(partToGenerate, newParams)
+      .then(({ filename }) => {
         generatedFilename = filename;
         generatedParameters = { ...newParams };
         lastGeneratedPartId = selectedPartId;
@@ -143,9 +222,7 @@
     errorMessage = null;
 
     try {
-      const { blob, filename } = await generateSTL(partToGenerate.endpoint, paramsToGenerate);
-      stlBlob = blob;
-      stlUrl = URL.createObjectURL(blob);
+      const { filename } = await generatePreview(partToGenerate, paramsToGenerate);
       generatedFilename = filename;
       generatedParameters = { ...paramsToGenerate };
       lastGeneratedPartId = selectedPartId;
@@ -192,7 +269,7 @@
 
     const filename = generatedFilename || generateFilename(currentPart, generatedParameters);
     downloadSTL(stlBlob, filename);
-   }
+  }
 
   function resetParameters() {
     if (!currentPart) return;
@@ -289,9 +366,9 @@
     <!-- Viewer Panel -->
     <div class="lg:w-2/3 bg-white rounded-lg shadow p-4">
       <div class="h-[500px] bg-gray-50 rounded flex items-center justify-center">
-        {#if stlUrl}
-          <Canvas key={stlUrl}>
-            <STLViewer model={stlUrl} />
+        {#if previewModels.length > 0}
+          <Canvas key={previewKey}>
+            <STLViewer models={previewModels} />
           </Canvas>
         {:else if loading}
           <div class="text-gray-400 text-center">
@@ -303,8 +380,12 @@
         {/if}
       </div>
       {#if stlUrl && !isDirty}
-        <button on:click={download} class="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-	  {currentPart?.id === 'tile-stack' ? 'Download ZIP' : 'Download'}
+        <button
+          on:click={download}
+          disabled={loading}
+          class="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
+        >
+          {currentPart?.id === 'tile-stack' ? 'Download ZIP' : 'Download'}
         </button>
       {/if}
     </div>
