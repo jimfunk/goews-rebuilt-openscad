@@ -1,3 +1,6 @@
+import asyncio
+import io
+import zipfile
 from enum import StrEnum
 from typing import Annotated
 
@@ -84,6 +87,45 @@ def make_tile_stack_filename(body: TileStackDefinition) -> str:
     )
 
 
+def tile_stack_build_params(body: TileStackDefinition, part: StackPart) -> dict:
+    skip_list = ",".join(repr(entry) for entry in body.skip_list)
+
+    return {
+        "tile_kind": body.tile_kind.value,
+        "part": part.value,
+        "stack_count": body.stack_count,
+        "spacer_h": body.spacer_h,
+        "spacer_xy_delta": body.spacer_xy_delta,
+        "enable_pull_tabs": body.enable_pull_tabs,
+        "tab_side": body.tab_side,
+        "tab_len": body.tab_len,
+        "tab_support_tile_gap": body.tab_support_tile_gap,
+        "variant": body.variant.to_int(),
+        "columns": body.columns,
+        "rows": body.rows,
+        "fill_top": body.fill_top,
+        "fill_bottom": body.fill_bottom,
+        "fill_left": body.fill_left,
+        "fill_right": body.fill_right,
+        "reverse_stagger": body.reverse_stagger,
+        "exact_width": body.exact_width,
+        "mounting_hole_shank_diameter": body.mounting_hole_shank_diameter,
+        "mounting_hole_head_diameter": body.mounting_hole_head_diameter,
+        "mounting_hole_inset_depth": body.mounting_hole_inset_depth,
+        "mounting_hole_countersink_depth": body.mounting_hole_countersink_depth,
+        "skip_list": skip_list,
+    }
+
+
+def make_tile_stack_basename(body: TileStackDefinition) -> str:
+    variant = "original" if body.variant.to_int() == 0 else "thicker-cleats"
+    return (
+        f"tile-stack-{body.tile_kind.value}-"
+        f"{body.columns}x{body.rows}-"
+        f"{body.stack_count}high-{variant}"
+    )
+
+
 @api_bp.post("/tile-stack")
 @openapi.body(TileStackDefinition)
 @openapi.response(200, "model/stl")
@@ -91,38 +133,49 @@ def make_tile_stack_filename(body: TileStackDefinition) -> str:
 @openapi.description("Create a stacked GOEWS tile assembly for PLA/PETG printing")
 @validate(json=TileStackDefinition)
 async def tile_stack(request: Request, body: TileStackDefinition):
-    skip_list = ",".join(repr(entry) for entry in body.skip_list)
     filename = make_tile_stack_filename(body)
 
     return response.raw(
         await build(
             "tile_stack.scad",
-            tile_kind=body.tile_kind.value,
-            part=body.part.value,
-            stack_count=body.stack_count,
-            spacer_h=body.spacer_h,
-            spacer_xy_delta=body.spacer_xy_delta,
-            enable_pull_tabs=body.enable_pull_tabs,
-            tab_side=body.tab_side,
-            tab_len=body.tab_len,
-            tab_support_tile_gap=body.tab_support_tile_gap,
-            variant=body.variant.to_int(),
-            columns=body.columns,
-            rows=body.rows,
-            fill_top=body.fill_top,
-            fill_bottom=body.fill_bottom,
-            fill_left=body.fill_left,
-            fill_right=body.fill_right,
-            reverse_stagger=body.reverse_stagger,
-            exact_width=body.exact_width,
-            mounting_hole_shank_diameter=body.mounting_hole_shank_diameter,
-            mounting_hole_head_diameter=body.mounting_hole_head_diameter,
-            mounting_hole_inset_depth=body.mounting_hole_inset_depth,
-            mounting_hole_countersink_depth=body.mounting_hole_countersink_depth,
-            # Match the existing GOEWS convention:
-            # tile.scad exposes skip_list as a string and parses it.
-            skip_list=skip_list,
+            **tile_stack_build_params(body, body.part),
         ),
         content_type="model/stl",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@api_bp.post("/tile-stack-bundle")
+@openapi.body(TileStackDefinition)
+@openapi.response(200, "application/zip")
+@openapi.summary("Tile Stack Bundle")
+@openapi.description(
+    "Create PLA tile and PETG spacer STLs for a stacked GOEWS tile assembly"
+)
+@validate(json=TileStackDefinition)
+async def tile_stack_bundle(request: Request, body: TileStackDefinition):
+    basename = make_tile_stack_basename(body)
+
+    pla_task = build(
+        "tile_stack.scad",
+        **tile_stack_build_params(body, StackPart.PLA),
+    )
+    petg_task = build(
+        "tile_stack.scad",
+        **tile_stack_build_params(body, StackPart.PETG),
+    )
+
+    pla_stl, petg_stl = await asyncio.gather(pla_task, petg_task)
+
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr(f"{basename}.stl", pla_stl)
+        zf.writestr(f"{basename}-spacers.stl", petg_stl)
+
+    return response.raw(
+        buf.getvalue(),
+        content_type="application/zip",
+        headers={
+            "Content-Disposition": f'attachment; filename="{basename}.zip"',
+        },
     )

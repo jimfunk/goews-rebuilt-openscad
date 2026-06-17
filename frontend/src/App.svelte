@@ -1,7 +1,7 @@
 <script>
   import { Canvas } from '@threlte/core';
   import { onMount } from 'svelte';
-  import { getOpenAPISchema, extractParts, generateSTL, downloadSTL, getDefaultValues, generateFilename } from '$lib/api.js';
+  import { getOpenAPISchema, extractParts, generateSTL, downloadSTL, generateBlob, downloadBlob, getDefaultValues, generateFilename } from '$lib/api.js';
   import PartTreeSelector from './components/PartTreeSelector.svelte';
   import ParameterForm from './components/ParameterForm.svelte';
   import STLViewer from './components/STLViewer.svelte';
@@ -37,7 +37,7 @@
       if (partIds.length > 0) {
         // Default to tile if available, otherwise first part
         selectedPartId = parts['tile'] ? 'tile' : partIds[0];
-        
+
         // Try to load saved parameters for this part from localStorage
         const savedParams = localStorage.getItem(`params:${selectedPartId}`);
         if (savedParams) {
@@ -49,12 +49,12 @@
         } else {
           parameters = getDefaultValues(parts[selectedPartId].schema);
         }
-        
+
         // Apply global variant if the part has variant property
         if (parts[selectedPartId]?.schema?.properties?.variant !== undefined) {
           parameters.variant = globalVariant;
         }
-        
+
         initialized = true;
       }
     } catch (e) {
@@ -157,11 +157,42 @@
     }
   }
 
-  function download() {
-    if (!stlBlob || !currentPart) return;
-    const filename = generatedFilename || generateFilename(currentPart, parameters);
+  async function download() {
+    if (!currentPart) return;
+
+    const paramsToDownload = {
+      ...generatedParameters,
+    };
+
+    if (currentPart.schema?.properties?.variant !== undefined) {
+      paramsToDownload.variant = globalVariant;
+    }
+
+    if (currentPart.id === 'tile-stack') {
+      loading = true;
+      errorMessage = null;
+
+      try {
+        const { blob, filename } = await generateBlob('/api/tile-stack-bundle', {
+          ...paramsToDownload,
+          part: 'all',
+        });
+
+        downloadBlob(blob, filename || 'tile-stack.zip');
+      } catch (e) {
+        errorMessage = e.message;
+      } finally {
+        loading = false;
+      }
+
+      return;
+    }
+
+    if (!stlBlob) return;
+
+    const filename = generatedFilename || generateFilename(currentPart, generatedParameters);
     downloadSTL(stlBlob, filename);
-  }
+   }
 
   function resetParameters() {
     if (!currentPart) return;
@@ -273,7 +304,7 @@
       </div>
       {#if stlUrl && !isDirty}
         <button on:click={download} class="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-          Download
+	  {currentPart?.id === 'tile-stack' ? 'Download ZIP' : 'Download'}
         </button>
       {/if}
     </div>

@@ -88,6 +88,56 @@ export function extractParts(openapi) {
 }
 
 /**
+ * Generate blob from endpoint
+ * @param {string} endpoint - API endpoint
+ * @param {Object} parameters - Parameters object
+ * @returns {Promise<{blob: Blob, filename: string}>}
+ */
+export async function generateBlob(endpoint, parameters) {
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(parameters),
+  });
+
+  if (!response.ok) {
+    const error = await response.text().catch(() => 'Model generation failed');
+    throw new Error(error || 'Model generation failed');
+  }
+
+  const contentDisposition = response.headers.get('Content-Disposition');
+  let filename = null;
+
+  const filenameMatch = contentDisposition?.match(/filename="?([^"]+)"?/);
+  if (filenameMatch) {
+    filename = filenameMatch[1].trim();
+  }
+
+  return {
+    blob: await response.blob(),
+    filename,
+  };
+}
+
+/**
+ * Download arbitrary blob as file
+ * @param {Blob} blob - Blob to download
+ * @param {string} filename - Filename for download
+ */
+export function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/**
  * Generate STL from endpoint
  * @param {string} endpoint - API endpoint
  * @param {Object} parameters - Parameters object
