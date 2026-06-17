@@ -9,7 +9,7 @@
     {
       id: 'tiles',
       name: 'Tiles',
-      parts: ['tile', 'grid-tile'],
+      parts: ['tile', 'grid-tile', 'tile-stack'],
     },
     {
       id: 'shelves',
@@ -26,6 +26,8 @@
   // Custom display names for parts
   const partDisplayNames = {
     tile: 'Standard Tile',
+    'grid-tile': 'Grid Tile',
+    'tile-stack': 'Tile Stack',
     shelf: 'Simple Shelf',
     mount: 'Hanger Mount',
     cableclip: 'Cable Clip',
