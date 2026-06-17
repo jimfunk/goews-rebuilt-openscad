@@ -1,9 +1,9 @@
-// stacked_goews_tiles.scad
+// tile_stack.scad
 //
 // Export twice:
 //
-//   openscad -o goews-stack-pla.stl  -D 'part="pla"'  stacked_goews_tiles.scad
-//   openscad -o goews-stack-petg.stl -D 'part="petg"' stacked_goews_tiles.scad
+//   openscad -o goews-stack-pla.stl  -D 'part="pla"'  tile_stack.scad
+//   openscad -o goews-stack-petg.stl -D 'part="petg"' tile_stack.scad
 //
 // Then import both STLs into Orca as one multi-part object.
 // Assign PLA to goews-stack-pla.stl and PETG to goews-stack-petg.stl.
