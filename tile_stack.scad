@@ -23,33 +23,29 @@ include <BOSL2/threading.scad>
 use <tile.scad>
 use <grid_tile.scad>
 
+include <parsers.scad>
+
 /* [Stack] */
 
-// "hex" or "grid". Hex is the primary path here.
-tile_kind = "hex";
+// "hex" or "grid"
+tile_kind = "hex"; // [hex, grid]
 
 // "pla", "petg", or "all" for preview
-part = "all";
+part = "all"; // [all, pla, petg]
 
-// Number of actual GOEWS tiles in the stack
 stack_count = 3;
 
-// PETG separator thickness.
-// Try 0.2 for one layer, 0.4 for two layers.
-spacer_h = 0.2;
+spacer_h = 0.6;
 
-// Shrink the separator slightly so it does not poke past the plate edge/chamfer.
+// Shrinks separator slightly so PETG does not peek past the plate edge.
 spacer_xy_delta = -0.20;
 
-// "hex_cells" is fast and recommended for hex GOEWS plates.
-// "projection_close" is slower, but useful if you use GOEWS fill_top/fill_bottom/etc.
-separator_mode = "hex_cells";
+// "hex_cells" is the recommended fast path for hex GOEWS plates.
+// "projection_close" is slower, but handles fill_top/fill_bottom/etc better.
+separator_mode = "hex_cells"; // [hex_cells, projection_close]
 
-// Used only by separator_mode="projection_close".
-// Should be bigger than the largest hole radius you want closed.
 separator_close_radius = 9;
 
-// Tiny visual/alignment nudge, in case your local GOEWS checkout differs.
 separator_nudge_x = 0;
 separator_nudge_y = 0;
 
@@ -58,56 +54,37 @@ separator_nudge_y = 0;
 enable_pull_tabs = true;
 
 // "right", "left", "front", or "back"
-// Right is the safest default for normal hex plates because the default stagger
-// usually gives you a good mid-row attachment on that side.
-tab_side = "right";
+tab_side = "right"; // [right, left, front, back]
 
-// How far the PETG tab sticks out beyond the plate footprint.
 tab_len = 22;
-
-// Width of the PETG tab.
-tab_width = 18;
-
-// How much the PETG tab overlaps into the separator sheet.
+tab_width = 14;
 tab_overlap = 4;
-
-// Rounded tab corners.
-tab_radius = 3;
+tab_radius = 2.5;
 
 /* [PLA Tab Supports] */
 
-// Add modeled PLA support islands under the exposed PETG pull tabs.
-// These are actual PLA geometry, not slicer-generated supports.
 enable_tab_supports = true;
 
-// Keep support island separated from the tile by this much.
+// Gap between main tile body and PLA support island.
 tab_support_tile_gap = 1.5;
 
-// Leave this much of the outer PETG tab unsupported/free for easier grabbing.
-tab_tip_free = 5;
+// 0 means support reaches all the way to the PETG tab end.
+// Increase only if you intentionally want unsupported PETG at the very tip.
+tab_tip_free = 0;
 
-// Width of PLA support under tab.
-// Slightly narrower than tab_width makes it easier to break away.
 tab_support_width = 14;
-
-// Slightly round the support island corners.
 tab_support_radius = 2;
 
-// Height gap below PETG separator.
-// 0 gives the best tab print reliability.
-// Try 0.05 only if PETG bonds too hard to the PLA support.
+// 0 gives best PETG tab print reliability.
 tab_support_z_gap = 0;
 
 /* [GOEWS Tile Parameters] */
 
-variant = 1; // 0 original, 1 thicker cleats
+variant = 1;
 
 columns = 4;
 rows = 4;
 
-// Hex edge fill params.
-// The fast hex_cells separator does not model these fill pieces.
-// Use separator_mode="projection_close" when these are enabled.
 fill_top = false;
 fill_bottom = false;
 fill_left = false;
@@ -118,7 +95,8 @@ exact_width = false;
 
 // GOEWS skiplist uses 1-based [row, column] entries.
 // Example: [[1, 2], [3, 4]]
-skiplist = [];
+skip_list = "";
+skiplist = parse_vector_list(skip_list);
 
 mounting_hole_shank_diameter = 4;
 mounting_hole_head_diameter = 8;
@@ -132,7 +110,6 @@ $fs = 0.5;
 
 stack_pitch = tile_thickness + spacer_h;
 
-// Match tile.scad's stagger logic.
 function hex_stagger_0() = reverse_stagger ? 1 : 0;
 function hex_stagger_1() = reverse_stagger ? 0 : 1;
 
@@ -147,6 +124,12 @@ function hex_row_min_x(row) =
 
 function hex_row_max_x(row) =
   hex_row_offset_x(row) + columns * tile_width;
+
+function hex_row_center_x(row) =
+  (hex_row_min_x(row) + hex_row_max_x(row)) / 2;
+
+function hex_row_center_y(row) =
+  row * tile_y_offset + tile_height / 2;
 
 hex_min_x = min([for (row = [0 : rows - 1]) hex_row_min_x(row)]);
 hex_max_x = max([for (row = [0 : rows - 1]) hex_row_max_x(row)]);
@@ -166,6 +149,47 @@ footprint_max_y = tile_kind == "grid" ? grid_max_y : hex_max_y;
 footprint_center_x = (footprint_min_x + footprint_max_x) / 2;
 footprint_center_y = (footprint_min_y + footprint_max_y) / 2;
 
+// Pick a real exposed hex row near the middle, rather than the overall bbox.
+// This fixes tabs floating beside an indented hex edge.
+hex_center_row = floor((rows - 1) / 2);
+
+function hex_nearest_right_row(r=hex_center_row) =
+  rows <= 1 ? 0 :
+  hex_row_max_x(r) == hex_max_x ? r :
+  r > 0 && hex_row_max_x(r - 1) == hex_max_x ? r - 1 :
+  r + 1 < rows && hex_row_max_x(r + 1) == hex_max_x ? r + 1 :
+  r;
+
+function hex_nearest_left_row(r=hex_center_row) =
+  rows <= 1 ? 0 :
+  hex_row_min_x(r) == hex_min_x ? r :
+  r > 0 && hex_row_min_x(r - 1) == hex_min_x ? r - 1 :
+  r + 1 < rows && hex_row_min_x(r + 1) == hex_min_x ? r + 1 :
+  r;
+
+hex_right_tab_row = hex_nearest_right_row();
+hex_left_tab_row = hex_nearest_left_row();
+hex_front_tab_row = 0;
+hex_back_tab_row = rows - 1;
+
+function tab_anchor_x() =
+  tile_kind == "hex" && tab_side == "right" ? hex_row_max_x(hex_right_tab_row) :
+  tile_kind == "hex" && tab_side == "left"  ? hex_row_min_x(hex_left_tab_row) :
+  tile_kind == "hex" && tab_side == "back"  ? hex_row_center_x(hex_back_tab_row) :
+  tile_kind == "hex" && tab_side == "front" ? hex_row_center_x(hex_front_tab_row) :
+  tab_side == "right" ? footprint_max_x :
+  tab_side == "left"  ? footprint_min_x :
+  footprint_center_x;
+
+function tab_anchor_y() =
+  tile_kind == "hex" && tab_side == "right" ? hex_row_center_y(hex_right_tab_row) :
+  tile_kind == "hex" && tab_side == "left"  ? hex_row_center_y(hex_left_tab_row) :
+  tile_kind == "hex" && tab_side == "back"  ? hex_max_y :
+  tile_kind == "hex" && tab_side == "front" ? hex_min_y :
+  tab_side == "back"  ? footprint_max_y :
+  tab_side == "front" ? footprint_min_y :
+  footprint_center_y;
+
 module rounded_rect_2d(size=[10, 5], r=2) {
   rr = min(r, min(size[0], size[1]) / 2 - 0.01);
 
@@ -176,8 +200,6 @@ module rounded_rect_2d(size=[10, 5], r=2) {
     ], center=true);
 }
 
-// Solid 2D version of GOEWS' pointy hex tile outline.
-// This deliberately omits hanger holes, screw holes, rear cuts, etc.
 module solid_hex_cell_2d() {
   polygon(points=[
     [tile_width / 2, 0],
@@ -244,9 +266,6 @@ module hex_cells_separator_2d() {
       }
 }
 
-// Slower fallback that preserves the projected outside outline much better than hull().
-// This can handle fill_top/fill_bottom/fill_left/fill_right more faithfully,
-// but it is much slower because it projects the real tile.
 module projection_closed_separator_2d() {
   translate([separator_nudge_x, separator_nudge_y])
     offset(delta=spacer_xy_delta)
@@ -273,70 +292,47 @@ module separator_footprint_2d() {
 }
 
 module tab_2d() {
+  ax = tab_anchor_x();
+  ay = tab_anchor_y();
+
   if (tab_side == "right") {
-    translate([
-      footprint_max_x + (tab_len - tab_overlap) / 2,
-      footprint_center_y
-    ])
+    translate([ax + (tab_len - tab_overlap) / 2, ay])
       rounded_rect_2d([tab_len + tab_overlap, tab_width], tab_radius);
 
   } else if (tab_side == "left") {
-    translate([
-      footprint_min_x - (tab_len - tab_overlap) / 2,
-      footprint_center_y
-    ])
+    translate([ax - (tab_len - tab_overlap) / 2, ay])
       rounded_rect_2d([tab_len + tab_overlap, tab_width], tab_radius);
 
   } else if (tab_side == "back") {
-    translate([
-      footprint_center_x,
-      footprint_max_y + (tab_len - tab_overlap) / 2
-    ])
+    translate([ax, ay + (tab_len - tab_overlap) / 2])
       rounded_rect_2d([tab_width, tab_len + tab_overlap], tab_radius);
 
   } else {
-    // "front"
-    translate([
-      footprint_center_x,
-      footprint_min_y - (tab_len - tab_overlap) / 2
-    ])
+    translate([ax, ay - (tab_len - tab_overlap) / 2])
       rounded_rect_2d([tab_width, tab_len + tab_overlap], tab_radius);
   }
 }
 
-// Support is intentionally separated from the tile footprint.
-// It starts outside the plate edge plus tab_support_tile_gap,
-// and stops before the tab tip by tab_tip_free.
 module tab_support_2d() {
-  support_len = max(0.01, tab_len - tab_tip_free - tab_support_tile_gap);
+  ax = tab_anchor_x();
+  ay = tab_anchor_y();
+
+  support_len = max(0.01, tab_len - tab_support_tile_gap - tab_tip_free);
 
   if (tab_side == "right") {
-    translate([
-      footprint_max_x + tab_support_tile_gap + support_len / 2,
-      footprint_center_y
-    ])
+    translate([ax + tab_support_tile_gap + support_len / 2, ay])
       rounded_rect_2d([support_len, tab_support_width], tab_support_radius);
 
   } else if (tab_side == "left") {
-    translate([
-      footprint_min_x - tab_support_tile_gap - support_len / 2,
-      footprint_center_y
-    ])
+    translate([ax - tab_support_tile_gap - support_len / 2, ay])
       rounded_rect_2d([support_len, tab_support_width], tab_support_radius);
 
   } else if (tab_side == "back") {
-    translate([
-      footprint_center_x,
-      footprint_max_y + tab_support_tile_gap + support_len / 2
-    ])
+    translate([ax, ay + tab_support_tile_gap + support_len / 2])
       rounded_rect_2d([tab_support_width, support_len], tab_support_radius);
 
   } else {
-    // "front"
-    translate([
-      footprint_center_x,
-      footprint_min_y - tab_support_tile_gap - support_len / 2
-    ])
+    translate([ax, ay - tab_support_tile_gap - support_len / 2])
       rounded_rect_2d([tab_support_width, support_len], tab_support_radius);
   }
 }
