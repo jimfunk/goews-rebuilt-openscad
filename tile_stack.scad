@@ -107,7 +107,7 @@ mounting_hole_countersink_depth = 2;
 
 // Clearance around the threaded GOEWS bolt hole in the PETG separator.
 // Increase this if the threaded hole still shows separator droop.
-separator_threaded_hole_clearance = 0.8;
+separator_threaded_hole_clearance = -0.8;
 
 // Maximum unsupported distance the next tile's first layer has to bridge
 // around the mounting shank hole. Larger values open more of the screw inset;
