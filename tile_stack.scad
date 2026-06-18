@@ -103,6 +103,34 @@ mounting_hole_head_diameter = 8;
 mounting_hole_inset_depth = 1;
 mounting_hole_countersink_depth = 2;
 
+/* [Separator Hole Relief] */
+
+// Clearance around the threaded GOEWS bolt hole in the PETG separator.
+// Increase this if the threaded hole still shows separator droop.
+separator_threaded_hole_clearance = 0.8;
+
+// Maximum unsupported distance the next tile's first layer has to bridge
+// around the mounting shank hole. Larger values open more of the screw inset;
+// smaller values give the next tile more support.
+separator_mounting_hole_start_overhang = 0.8;
+
+// Keep this much PETG lip around the screw-head inset edge.
+// This prevents the separator from trying to bridge the whole inset.
+separator_mounting_inset_edge_lip = 0.8;
+
+// Keep this much PETG lip around the central hanger/window cutout.
+// Larger values support the next tile more; smaller values open more of the window.
+separator_window_edge_lip = 2.5;
+
+// Rounded corner radius for the hanger/window relief cut.
+separator_window_corner_radius = 2.5;
+
+// Leave PETG under the circular pad around the GOEWS bolt hole.
+// Larger values remove more PETG around that circular pad; smaller values
+// leave more PETG separator material. This should stay smaller than the
+// circular pad radius.
+separator_window_threaded_pad_clearance = -0.5;
+
 /* [Hidden] */
 
 $fa = 0.5;
@@ -189,6 +217,36 @@ function tab_anchor_y() =
   tab_side == "back"  ? footprint_max_y :
   tab_side == "front" ? footprint_min_y :
   footprint_center_y;
+
+function separator_threaded_hole_cut_radius() =
+  (thread_diameter + thread_tolerance) / 2 + separator_threaded_hole_clearance;
+
+function separator_mounting_hole_cut_radius() =
+  max(
+    mounting_hole_shank_diameter / 2,
+    min(
+      mounting_hole_shank_diameter / 2 + separator_mounting_hole_start_overhang,
+      mounting_hole_head_diameter / 2 - separator_mounting_inset_edge_lip
+    )
+  );
+
+function separator_window_cut_width() =
+  max(0.01, tile_hanger_width - 2 * separator_window_edge_lip);
+
+function separator_window_cut_height() =
+  max(0.01, tile_hanger_height - 2 * separator_window_edge_lip);
+
+function separator_window_cut_radius() =
+  min(
+    separator_window_corner_radius,
+    min(separator_window_cut_width(), separator_window_cut_height()) / 2 - 0.01
+  );
+
+function separator_window_threaded_pad_keep_radius() =
+  max(
+    separator_threaded_hole_cut_radius(),
+    tile_hanger_hole_outer_diameter - separator_window_threaded_pad_clearance
+  );
 
 module rounded_rect_2d(size=[10, 5], r=2) {
   rr = min(r, min(size[0], size[1]) / 2 - 0.01);
@@ -291,6 +349,69 @@ module separator_footprint_2d() {
   }
 }
 
+module separator_window_relief_2d() {
+  hanger_x_offset = (tile_width - tile_hanger_width) / 2;
+
+  difference() {
+    translate([
+      hanger_x_offset + tile_hanger_width / 2,
+      tile_triangle_height + tile_hanger_height / 2
+    ])
+      rounded_rect_2d(
+        [separator_window_cut_width(), separator_window_cut_height()],
+        separator_window_cut_radius()
+      );
+
+    // Keep separator material under the circular boss/pad around the GOEWS
+    // bolt hole. The actual threaded hole is still cut separately by
+    // hex_separator_hole_relief_2d().
+    translate([tile_width / 2, tile_height - tile_threaded_hole_y_offset])
+      circle(r=separator_window_threaded_pad_keep_radius());
+  }
+}
+
+module hex_separator_hole_relief_2d() {
+  translate([separator_nudge_x, separator_nudge_y])
+    union() {
+      for (row = [0 : rows - 1]) {
+        offset_x = hex_row_offset_x(row);
+        start_column = hex_row_start_column(row);
+        pos_y = row * tile_y_offset;
+
+        for (column = [start_column : columns - 1]) {
+          pos_x = offset_x + column * tile_width;
+
+          if (!in_list([row + 1, column + 1], skiplist)) {
+            translate([pos_x, pos_y]) {
+              // Open most of the central hanger/window area, leaving a small
+              // lip so the next tile's first layers have somewhere to start.
+              // The circular GOEWS-bolt pad is protected by
+              // separator_window_relief_2d(), then the actual threaded hole is
+              // cut separately below.
+              separator_window_relief_2d();
+
+              // Do not bridge the threaded GOEWS bolt hole.
+              translate([tile_width / 2, tile_height - tile_threaded_hole_y_offset])
+                circle(r=separator_threaded_hole_cut_radius());
+
+              // Open most of the mounting screw inset, while leaving a small
+              // PETG ledge to support the next tile's first layer around the
+              // shank hole.
+              translate([tile_width / 2, tile_mounting_hole_y_offset])
+                circle(r=separator_mounting_hole_cut_radius());
+            }
+          }
+        }
+      }
+    }
+}
+
+module separator_hole_relief_2d() {
+  if (tile_kind == "hex") {
+    hex_separator_hole_relief_2d();
+  }
+}
+
 module tab_2d() {
   ax = tab_anchor_x();
   ay = tab_anchor_y();
@@ -339,11 +460,15 @@ module tab_support_2d() {
 
 module separator_sheet() {
   linear_extrude(height=spacer_h)
-    union() {
-      separator_footprint_2d();
+    difference() {
+      union() {
+        separator_footprint_2d();
 
-      if (enable_pull_tabs)
-        tab_2d();
+        if (enable_pull_tabs)
+          tab_2d();
+      }
+
+      separator_hole_relief_2d();
     }
 }
 
