@@ -6,7 +6,7 @@
   import SkipListParameter from '../parameters/SkipListParameter.svelte';
   import MountHoleListParameter from '../parameters/MountHoleListParameter.svelte';
 
-  let { field = {}, parameters, fieldName, error = null, onClearError = null } = $props();
+  let { field = {}, parameters, fieldName, error = null, fieldErrors = {}, onClearError = null } = $props();
 
   function getComponent(field) {
     if (field?.enum) {
@@ -42,9 +42,9 @@
 
 <div class="parameter-field">
   {#if Component}
-    <Component {field} {parameters} {fieldName} {error} {onClearError} />
+    <Component {field} {parameters} {fieldName} {error} {fieldErrors} {onClearError} />
   {/if}
-  {#if error}
+  {#if error && field.type !== 'array'}
     <p class="text-red-500 text-sm mt-1">{error}</p>
   {/if}
 </div>

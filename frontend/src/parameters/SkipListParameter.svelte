@@ -1,5 +1,5 @@
 <script>
-  let { field, parameters, fieldName, error = null, onClearError = null } = $props();
+  let { field, parameters, fieldName, error = null, fieldErrors = {}, onClearError = null } = $props();
 
   function addSkipListEntry() {
     const currentValue = parameters[fieldName] || [];
@@ -31,6 +31,12 @@
     {field.description}
   </p>
 
+  {#if error}
+    <div class="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded mb-3 text-sm">
+      {error}
+    </div>
+  {/if}
+
   {#if Array.isArray(parameters[fieldName])}
     {#each parameters[fieldName] as skip_tile, index}
       <div class="flex items-center space-x-2 mb-2">
@@ -39,22 +45,24 @@
           class="text-gray-700 text-sm font-bold">Row:</label
         >
         <input
-          type="number"
+          type="text"
+          inputmode="numeric"
           id={`row-${index}`}
           value={parameters[fieldName][index][0]}
-          oninput={(e) => updateEntry(index, 0, parseFloat(e.target.value) || 0)}
-          class="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline w-20"
+          onblur={(e) => updateEntry(index, 0, parseInt(e.target.value) || 0)}
+          class="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline w-20 {error ? 'border-red-500' : ''}"
         />
         <label
           for={`column-${index}`}
           class="text-gray-700 text-sm font-bold">Column:</label
         >
         <input
-          type="number"
+          type="text"
+          inputmode="numeric"
           id={`column-${index}`}
           value={parameters[fieldName][index][1]}
-          oninput={(e) => updateEntry(index, 1, parseFloat(e.target.value) || 0)}
-          class="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline w-20"
+          onblur={(e) => updateEntry(index, 1, parseInt(e.target.value) || 0)}
+          class="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline w-20 {error ? 'border-red-500' : ''}"
         />
         <button
           type="button"

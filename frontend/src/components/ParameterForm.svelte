@@ -24,6 +24,7 @@
       {parameters}
       fieldName={field.name}
       error={fieldErrors[field.name]}
+      {fieldErrors}
       onClearError={() => onFieldError?.(field.name)}
     />
   {/each}
