@@ -1,5 +1,5 @@
 <script>
-  let { field, parameters, fieldName } = $props();
+  let { field, parameters, fieldName, error = null, onClearError = null } = $props();
 
   function addSkipListEntry() {
     const currentValue = parameters[fieldName] || [];
@@ -16,6 +16,7 @@
     parameters[fieldName] = currentValue.map((entry, i) =>
       i === index ? entry.map((v, j) => j === dimensionIndex ? newValue : v) : entry
     );
+    onClearError?.();
   }
 </script>
 

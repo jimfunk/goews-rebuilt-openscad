@@ -2,6 +2,7 @@
   import { Canvas } from '@threlte/core';
   import { onMount, onDestroy } from 'svelte';
   import { getOpenAPISchema, extractParts, generateSTL, downloadSTL, generateBlob, downloadBlob, getDefaultValues, generateFilename } from '$lib/api.js';
+  import { parseValidationErrors, isValidationError } from '$lib/errors.js';
   import PartTreeSelector from './components/PartTreeSelector.svelte';
   import ParameterForm from './components/ParameterForm.svelte';
   import STLViewer from './components/STLViewer.svelte';
@@ -16,6 +17,7 @@
   let previewModels = $state([]);
   let loading = $state(false);
   let errorMessage = $state(null);
+  let fieldErrors = $state({});
   let initialized = $state(false);
   let lastGeneratedPartId = $state(null);
   let generatedParameters = $state({});
@@ -192,6 +194,7 @@
 
     loading = true;
     errorMessage = null;
+    fieldErrors = {};
 
     generatePreview(partToGenerate, newParams)
       .then(({ filename }) => {
@@ -201,7 +204,13 @@
         parameters = { ...newParams };
       })
       .catch((e) => {
-        errorMessage = e.message;
+        if (isValidationError(e.message)) {
+          fieldErrors = parseValidationErrors(e.message);
+          errorMessage = 'Please fix the validation errors below.';
+        } else {
+          errorMessage = e.message;
+          fieldErrors = {};
+        }
       })
       .finally(() => {
         loading = false;
@@ -220,6 +229,7 @@
 
     loading = true;
     errorMessage = null;
+    fieldErrors = {};
 
     try {
       const { filename } = await generatePreview(partToGenerate, paramsToGenerate);
@@ -228,7 +238,13 @@
       lastGeneratedPartId = selectedPartId;
       saveParams();
     } catch (e) {
-      errorMessage = e.message;
+      if (isValidationError(e.message)) {
+        fieldErrors = parseValidationErrors(e.message);
+        errorMessage = 'Please fix the validation errors below.';
+      } else {
+        errorMessage = e.message;
+        fieldErrors = {};
+      }
     } finally {
       loading = false;
     }
@@ -357,6 +373,18 @@
               schema={currentPart.schema}
               bind:parameters
               filterFields={(field) => field.name !== 'variant'}
+              {fieldErrors}
+              onFieldError={(field) => {
+                // Clear field error when user changes value
+                if (fieldErrors[field]) {
+                  const newErrors = { ...fieldErrors };
+                  delete newErrors[field];
+                  fieldErrors = newErrors;
+                  if (Object.keys(fieldErrors).length === 0) {
+                    errorMessage = null;
+                  }
+                }
+              }}
             />
           {/if}
         </form>

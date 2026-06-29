@@ -1,7 +1,7 @@
 <script>
   import ParameterField from './ParameterField.svelte';
 
-  let { schema = {}, parameters = $bindable({}), sectionTitle = '', filterFields = null } = $props();
+  let { schema = {}, parameters = $bindable({}), sectionTitle = '', filterFields = null, fieldErrors = {}, onFieldError = null } = $props();
 
   let fields = $derived(
     Object.entries(schema?.properties || {})
@@ -19,7 +19,13 @@
   {/if}
 
   {#each fields as field, i (field.name)}
-    <ParameterField {field} {parameters} fieldName={field.name} />
+    <ParameterField
+      {field}
+      {parameters}
+      fieldName={field.name}
+      error={fieldErrors[field.name]}
+      onClearError={() => onFieldError?.(field.name)}
+    />
   {/each}
 </div>
 

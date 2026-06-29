@@ -19,10 +19,15 @@ export async function getOpenAPISchema() {
 function resolveSchema(schema, components) {
   if (!schema) return schema;
 
-  // If it's a $ref, resolve it
+  // If it's a $ref, resolve it but preserve additional properties like default
   if (schema.$ref) {
     const refPath = schema.$ref.replace('#/components/schemas/', '');
-    schema = components?.schemas?.[refPath] || schema;
+    const resolved = components?.schemas?.[refPath];
+    if (resolved) {
+      // Merge resolved schema with original properties (preserving default, description, etc.)
+      const { $ref, ...originalProps } = schema;
+      schema = { ...resolved, ...originalProps };
+    }
   }
 
   // Recursively resolve properties
@@ -151,8 +156,17 @@ export async function generateSTL(endpoint, parameters) {
   });
 
   if (!response.ok) {
-    const error = await response.text().catch(() => 'Model generation failed');
-    throw new Error(error || 'Model generation failed');
+    const errorText = await response.text().catch(() => 'Model generation failed');
+    // Try to parse JSON error response to extract message
+    try {
+      const errorJson = JSON.parse(errorText);
+      throw new Error(errorJson.message || errorText);
+    } catch (e) {
+      if (e.message && e.message !== errorText) {
+        throw e; // Re-throw the parsed error
+      }
+      throw new Error(errorText || 'Model generation failed');
+    }
   }
 
   // Extract filename from Content-Disposition header

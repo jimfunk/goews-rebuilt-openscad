@@ -2,7 +2,13 @@
 
 import pytest
 from pydantic import ValidationError
-from server.parts.gridfinity_bin import GridfinityBinDefinition, make_gridfinity_bin_filename
+from server.parts.gridfinity_bin import (
+    GridfinityBinDefinition,
+    GridzDefine,
+    StyleTab,
+    PlaceTab,
+    make_gridfinity_bin_filename,
+)
 from server.enums import Variant
 
 
@@ -15,7 +21,7 @@ class TestGridfinityBinDefinition:
         assert body.gridx == 2
         assert body.gridy == 1
         assert body.gridz == 3
-        assert body.gridz_define == 0
+        assert body.gridz_define == GridzDefine.GRIDZ_UNITS
         assert body.height_internal == 0
         assert body.enable_zsnap is False
         assert body.include_lip is True
@@ -24,8 +30,8 @@ class TestGridfinityBinDefinition:
         assert body.cut_cylinders is False
         assert body.cd == 10
         assert body.c_chamfer == 0.5
-        assert body.style_tab == 5
-        assert body.place_tab == 0
+        assert body.style_tab == StyleTab.NONE
+        assert body.place_tab == PlaceTab.EVERYWHERE
         assert body.scoop == 1
         assert body.only_corners is False
         assert body.refined_holes is False
@@ -56,9 +62,9 @@ class TestGridfinityBinDefinition:
             GridfinityBinDefinition(gridz=0)
 
     def test_validation_gridz_define(self):
-        """Test that gridz_define must be 0, 1, 2, or 3."""
+        """Test that gridz_define must be a valid GridzDefine value."""
         with pytest.raises(ValidationError):
-            GridfinityBinDefinition(gridz_define=4)
+            GridfinityBinDefinition(gridz_define="Invalid")
 
     def test_validation_height_internal_ge_zero(self):
         """Test that height_internal must be greater than or equal to zero."""
@@ -179,13 +185,13 @@ class TestMakeGridfinityBinFilename:
 
     def test_custom_style_tab(self):
         """Test filename with custom style_tab."""
-        body = GridfinityBinDefinition(style_tab=0)
-        assert make_gridfinity_bin_filename(body) == "gridfinity-bin-2x1x3-original-style_tab_0.stl"
+        body = GridfinityBinDefinition(style_tab=StyleTab.FULL)
+        assert make_gridfinity_bin_filename(body) == "gridfinity-bin-2x1x3-original-style_tab_Full.stl"
 
     def test_custom_place_tab(self):
         """Test filename with custom place_tab."""
-        body = GridfinityBinDefinition(place_tab=1)
-        assert make_gridfinity_bin_filename(body) == "gridfinity-bin-2x1x3-original-place_tab_1.stl"
+        body = GridfinityBinDefinition(place_tab=PlaceTab.TOP_LEFT_DIVISION)
+        assert make_gridfinity_bin_filename(body) == "gridfinity-bin-2x1x3-original-place_tab_Top-Left Division.stl"
 
     def test_custom_scoop(self):
         """Test filename with custom scoop."""

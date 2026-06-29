@@ -1,5 +1,5 @@
 <script>
-  let { field, parameters, fieldName } = $props();
+  let { field, parameters, fieldName, error = null, onClearError = null } = $props();
 
   function formatTitle(title) {
     if (!title) return '';
@@ -15,6 +15,7 @@
   function handleInput(event) {
     const numValue = parseFloat(event.target.value);
     parameters[fieldName] = isNaN(numValue) ? 0 : numValue;
+    onClearError?.();
   }
 </script>
 
@@ -35,6 +36,6 @@
     id={field.name}
     value={parameters[fieldName]}
     oninput={handleInput}
-    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+    class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline {error ? 'border-red-500' : ''}"
   />
 </div>

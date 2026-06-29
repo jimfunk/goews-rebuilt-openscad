@@ -1,5 +1,5 @@
 <script>
-  let { field, parameters, fieldName } = $props();
+  let { field, parameters, fieldName, error = null, onClearError = null } = $props();
 
   function formatTitle(title) {
     if (!title) return '';
@@ -14,6 +14,7 @@
 
   function handleChange(event) {
     parameters[fieldName] = event.target.checked;
+    onClearError?.();
   }
 </script>
 

@@ -1,24 +1,33 @@
 <script>
-  let { field, parameters, fieldName } = $props();
+  let { field, parameters, fieldName, error = null, onClearError = null } = $props();
 
   const MountHoleType = {
-    Round: { value: 1, description: 'Round for heat-set insert or self-tapping screw' },
-    Hex: { value: 2, description: 'Hex recess for hex nut or bolt head' },
-    Square: { value: 3, description: 'Square recess for square nut' },
-    SocketHead: { value: 4, description: 'Socket Head counterbore for SHCS' },
-    ButtonHead: { value: 5, description: 'Button Head counterbore for BHCS' },
-    CountersinkHead: { value: 6, description: 'Countersink for FHCS' },
+    Round: 'Round',
+    Hex: 'Hex',
+    Square: 'Square',
+    SocketHead: 'Socket Head',
+    ButtonHead: 'Button Head',
+    CountersinkHead: 'Countersink Head',
   };
 
-  const mountHoleTypeOptions = Object.entries(MountHoleType).map(([key, typeObject]) => ({
-    value: typeObject.value,
-    name: typeObject.description,
+  const mountHoleTypeDescriptions = {
+    Round: 'Round for heat-set insert or self-tapping screw',
+    Hex: 'Hex recess for hex nut or bolt head',
+    Square: 'Square recess for square nut',
+    'Socket Head': 'Socket Head counterbore for SHCS',
+    'Button Head': 'Button Head counterbore for BHCS',
+    'Countersink Head': 'Countersink for FHCS',
+  };
+
+  const mountHoleTypeOptions = Object.values(MountHoleType).map((value) => ({
+    value: value,
+    name: mountHoleTypeDescriptions[value],
   }));
 
   function addMountHole() {
     const currentValue = parameters[fieldName] || [];
     const newHole = {
-      hole_type: MountHoleType.Round.value,
+      hole_type: MountHoleType.Round,
       x_offset: 20.75,
       y_offset: 17.5,
       diameter: 4.0,
@@ -37,6 +46,7 @@
     parameters[fieldName] = currentValue.map((hole, i) =>
       i === index ? { ...hole, [field]: newValue } : hole
     );
+    onClearError?.();
   }
 </script>
 
@@ -66,7 +76,7 @@
             <select
               id={`hole_type-${index}`}
               value={hole.hole_type}
-              onchange={(e) => updateHole(index, 'hole_type', parseInt(e.target.value))}
+              onchange={(e) => updateHole(index, 'hole_type', e.target.value)}
               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             >
               {#each mountHoleTypeOptions as option}

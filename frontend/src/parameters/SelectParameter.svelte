@@ -1,5 +1,5 @@
 <script>
-  let { field, parameters, fieldName } = $props();
+  let { field, parameters, fieldName, error = null, onClearError = null } = $props();
 
   let enumValues = $derived(field?.enum || []);
   let enumNames = $derived(field?.['x-enum-varnames'] || []);
@@ -18,6 +18,7 @@
 
   function handleChange(event) {
     parameters[fieldName] = event.target.value;
+    onClearError?.();
   }
 </script>
 
@@ -36,7 +37,7 @@
     id={field.name}
     value={parameters[fieldName]}
     onchange={handleChange}
-    class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+    class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline {error ? 'border-red-500' : ''}"
   >
     {#each enumValues as option, i}
       <option value={option}>{hasNames ? enumNames[i] : option}</option>
