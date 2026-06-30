@@ -12,25 +12,8 @@
 
   let formattedTitle = $derived(formatTitle(field?.title) || field?.name?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()));
 
-  // Use a string buffer for the input to allow typing decimals
-  let inputBuffer = $state('');
-
-  // Sync from parameter when not editing
-  function syncFromParam() {
-    inputBuffer = String(parameters[fieldName] ?? '');
-  }
-
-  function handleFocus() {
-    syncFromParam();
-  }
-
-  function handleInput(event) {
-    // Update local buffer, don't touch parameters yet
-    inputBuffer = event.target.value;
-  }
-
-  function handleBlur() {
-    const numValue = parseFloat(inputBuffer);
+  function handleBlur(event) {
+    const numValue = parseFloat(event.target.value);
     if (!isNaN(numValue)) {
       parameters[fieldName] = numValue;
     } else {
@@ -38,9 +21,6 @@
     }
     onClearError?.();
   }
-
-  // Initialize
-  syncFromParam();
 </script>
 
 <div>
@@ -55,11 +35,10 @@
   </p>
 
   <input
-    type="text"
-    inputmode="decimal"
+    type="number"
+    step="any"
     id={field.name}
-    bind:value={inputBuffer}
-    onfocus={handleFocus}
+    value={parameters[fieldName]}
     onblur={handleBlur}
     class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline {error ? 'border-red-500' : ''}"
   />
