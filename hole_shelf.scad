@@ -25,6 +25,12 @@ thickness = 4;
 // Hole radius in mm
 hole_radius = 3.5;
 
+// Chamfer depth from the top of each hole in mm (0 for no chamfer)
+hole_chamfer_depth = 0;
+
+// Chamfer angle in degrees from the vertical axis
+hole_chamfer_angle = 45;
+
 // Gap between holes in a column in mm
 column_gap = 15;
 
@@ -60,6 +66,8 @@ module hole_shelf(
     columns=3,
     rows=1,
     hole_radius=3.5,
+    hole_chamfer_depth=0,
+    hole_chamfer_angle=45,
     column_gap=15,
     row_gap=15,
     front_gap=15,
@@ -108,8 +116,21 @@ module hole_shelf(
                     hole_y = rear_gap + row * (row_gap + 2 * hole_radius) + hole_radius;
                     for (col = [0 : columns - 1]) {
                         hole_x = row_offset + col * (column_gap + 2 * hole_radius) + hole_radius;
-                        translate([hole_x, hole_y, 0])
-                            cylinder(h = thickness, r = hole_radius);
+                        translate([hole_x, hole_y, 0]) {
+                            effective_chamfer_depth = min(max(hole_chamfer_depth, 0), thickness);
+                            chamfer_radius_increase = effective_chamfer_depth > 0 ? tan(hole_chamfer_angle) * effective_chamfer_depth : 0;
+                            body_height = thickness - effective_chamfer_depth;
+
+                            if (effective_chamfer_depth > 0) {
+                                union() {
+                                    cylinder(h = body_height, r = hole_radius);
+                                    translate([0, 0, body_height])
+                                        cylinder(h = effective_chamfer_depth, r1 = hole_radius, r2 = hole_radius + chamfer_radius_increase);
+                                }
+                            } else {
+                                cylinder(h = thickness, r = hole_radius);
+                            }
+                        }
                     }
                 }
             }
@@ -129,6 +150,8 @@ hole_shelf(
     columns=columns,
     rows=rows,
     hole_radius=hole_radius,
+    hole_chamfer_depth=hole_chamfer_depth,
+    hole_chamfer_angle=hole_chamfer_angle,
     column_gap=column_gap,
     row_gap=row_gap,
     front_gap=front_gap,
