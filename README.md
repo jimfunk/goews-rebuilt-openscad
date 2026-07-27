@@ -1,6 +1,6 @@
 # GOEWS rebuilt in OpenSCAD
 
-This is a rebuild of [GOEWS](https://goews.xyz/) in OpenSCAD to allow for easy
+This is a rebuild of [GOEWS](https://goews.ws/) in OpenSCAD to allow for easy
 generation and customization of parts. It requires the
 [BOSL2](https://github.com/BelfrySCAD/BOSL2) library and
 [Gridfinity Rebuilt in OpenSCAD](https://github.com/kennetek/gridfinity-rebuilt-openscad)
