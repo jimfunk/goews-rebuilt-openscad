@@ -99,6 +99,7 @@ parts: \
 	parts-gridfinity-bins \
 	parts-hole-shelves \
 	parts-hooks \
+	parts-pliers-hangers \
 	parts-shelf-brackets \
 	parts-shelves \
 	parts-slot-shelves \
@@ -111,6 +112,7 @@ clean-parts: \
 	clean-parts-gridfinity-bins \
 	clean-parts-hole-shelves \
 	clean-parts-hooks \
+	clean-parts-pliers-hangers \
 	clean-parts-shelf-brackets \
 	clean-parts-shelves \
 	clean-parts-slot-shelves \
@@ -250,6 +252,35 @@ parts-hooks: $(HOOKS)
 clean-parts-hooks:
 	rm -rf $(HOOK_DIR)
 .PHONY: parts-hooks clean-parts-hooks
+
+
+#
+# Pliers hangers (default size, both cleat variants)
+#
+PLIERS_HANGER_DIR = $(BUILD_DIR)/pliers-hanger
+PLIERS_HANGERS = $(foreach variant,$(VARIANTS), \
+	$(PLIERS_HANGER_DIR)/$(variant)/pliers-hanger-24x25x18-$(variant).stl)
+
+$(PLIERS_HANGERS): $(PLIERS_HANGER_DIR)/%.stl: pliers_hanger.scad hanger.scad constants.scad
+	$(eval VARIANT := $(word 1,$(subst /, ,$*)))
+	$(eval VARIANT_NUM := $(if $(filter original,$(VARIANT)),0,1))
+	mkdir -p $(dir $@)
+	$(OPENSCAD) $(OPENSCAD_ARGS) \
+		-o $@ pliers_hanger.scad \
+		-D 'variant=$(VARIANT_NUM)' \
+		-D 'width=24' \
+		-D 'depth=25' \
+		-D 'height=18' \
+		-D 'tip_width=4' \
+		-D 'lip_height=4' \
+		-D 'lip_thickness=3' \
+		-D 'rounding=1' \
+		-D 'hanger_tolerance=0.15'
+
+parts-pliers-hangers: $(PLIERS_HANGERS)
+clean-parts-pliers-hangers:
+	rm -rf $(PLIERS_HANGER_DIR)
+.PHONY: parts-pliers-hangers clean-parts-pliers-hangers
 
 
 #

@@ -19,7 +19,7 @@
     {
       id: 'accessories',
       name: 'Accessories',
-      parts: ['bin', 'gridfinity_bin', 'cup', 'rack', 'hook', 'bolt', 'mount', 'cableclip'],
+      parts: ['bin', 'gridfinity_bin', 'cup', 'rack', 'hook', 'pliers_hanger', 'bolt', 'mount', 'cableclip'],
     },
   ];
 
@@ -32,6 +32,7 @@
     mount: 'Hanger Mount',
     shelf_bracket: 'Shelf Bracket',
     cableclip: 'Cable Clip',
+    pliers_hanger: 'Pliers Hanger',
     gridfinity_bin: 'Gridfinity Bin',
   };
 

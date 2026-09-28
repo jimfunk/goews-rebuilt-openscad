@@ -1,0 +1,6 @@
+-r requirements-test.txt
+# Optional dependencies for real STL geometry tests (OpenSCAD + BOSL2 also required).
+trimesh>=4.0,<6
+numpy>=1.26,<3
+scipy>=1.11,<2
+rtree>=1.2,<2
