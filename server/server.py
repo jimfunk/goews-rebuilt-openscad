@@ -8,6 +8,7 @@ from sanic import Sanic, response
 from sanic_ext import Extend, openapi
 
 from server.api import api_bp
+from server.openscad import OpenSCADError
 
 top_dir = (Path(__file__) / "../..").resolve()
 frontend_dir = top_dir / "frontend/dist"
@@ -32,6 +33,11 @@ app.static("/favicon.svg", frontend_dir / "favicon.svg", name="favicon")
 @openapi.description("This is the main page that returns the frontend application.")
 async def main(request):
     return await response.file(frontend_dir / "index.html")
+
+
+@app.exception(OpenSCADError)
+async def openscad_error(request, exception):
+    return response.text(str(exception), status=400)
 
 
 # Get the API calls loaded

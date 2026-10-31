@@ -41,7 +41,6 @@ class TestGridfinityBinDefinition:
         assert body.chamfer_holes is False
         assert body.printable_hole_top is False
         assert body.enable_thumbscrew is False
-        assert body.wall_thickness == 1.2
         assert body.bottom_thickness == 1.2
         assert body.hanger_tolerance == 0.15
         assert body.variant == Variant.ORIGINAL
@@ -96,11 +95,6 @@ class TestGridfinityBinDefinition:
         with pytest.raises(ValidationError):
             GridfinityBinDefinition(scoop=-0.1)
 
-    def test_validation_wall_thickness_gt_zero(self):
-        """Test that wall_thickness must be greater than zero."""
-        with pytest.raises(ValidationError):
-            GridfinityBinDefinition(wall_thickness=0)
-
     def test_validation_bottom_thickness_gt_zero(self):
         """Test that bottom_thickness must be greater than zero."""
         with pytest.raises(ValidationError):
@@ -110,6 +104,101 @@ class TestGridfinityBinDefinition:
         """Test that hanger_tolerance must be greater than or equal to zero."""
         with pytest.raises(ValidationError):
             GridfinityBinDefinition(hanger_tolerance=-0.1)
+
+    def test_validation_bottom_thickness_le_base_height(self):
+        """Test that bottom_thickness cannot exceed the gridfinity base height."""
+        assert GridfinityBinDefinition(bottom_thickness=7).bottom_thickness == 7
+        with pytest.raises(ValidationError):
+            GridfinityBinDefinition(bottom_thickness=7.01)
+
+    def test_validation_scoop_le_one(self):
+        """Test that scoop cannot exceed 100 percent."""
+        assert GridfinityBinDefinition(scoop=0).scoop == 0
+        assert GridfinityBinDefinition(scoop=1).scoop == 1
+        with pytest.raises(ValidationError):
+            GridfinityBinDefinition(scoop=1.1)
+
+
+class TestGridfinityBinBuildConstraints:
+    """Tests for parameter combinations OpenSCAD cannot build."""
+
+    def test_thumbscrew_requires_full_base(self):
+        """Test that thumbscrew rejects the default bottom_thickness."""
+        with pytest.raises(ValidationError) as exc_info:
+            GridfinityBinDefinition(enable_thumbscrew=True)
+        assert exc_info.value.errors()[0]["loc"] == ("bottom_thickness",)
+
+    def test_thumbscrew_with_full_base(self):
+        """Test that thumbscrew is accepted with a full height base."""
+        body = GridfinityBinDefinition(enable_thumbscrew=True, bottom_thickness=7)
+        assert body.enable_thumbscrew is True
+
+    def test_refined_holes_incompatible_with_magnet_holes(self):
+        """Test that refined holes cannot be combined with magnet holes."""
+        with pytest.raises(ValidationError) as exc_info:
+            GridfinityBinDefinition(refined_holes=True, magnet_holes=True)
+        assert exc_info.value.errors()[0]["loc"] == ("magnet_holes",)
+
+    def test_refined_holes_with_screw_holes(self):
+        """Test that refined holes are accepted with screw holes."""
+        body = GridfinityBinDefinition(refined_holes=True, screw_holes=True)
+        assert body.refined_holes is True
+
+    def test_height_internal_maximum(self):
+        """Test that height_internal cannot exceed the bin height less the lip support."""
+        assert GridfinityBinDefinition(height_internal=19.8).height_internal == 19.8
+        with pytest.raises(ValidationError) as exc_info:
+            GridfinityBinDefinition(height_internal=19.81)
+        assert exc_info.value.errors()[0]["loc"] == ("height_internal",)
+
+    def test_height_internal_maximum_uses_gridz_define(self):
+        """Test that the height_internal maximum follows the gridz definition."""
+        body = GridfinityBinDefinition(gridz_define=GridzDefine.INTERNAL_MM, height_internal=8.8)
+        assert body.height_internal == 8.8
+        with pytest.raises(ValidationError):
+            GridfinityBinDefinition(gridz_define=GridzDefine.INTERNAL_MM, height_internal=8.81)
+
+    def test_height_internal_unlimited_without_lip(self):
+        """Test that height_internal is unbounded when the lip is excluded."""
+        body = GridfinityBinDefinition(include_lip=False, height_internal=1000)
+        assert body.height_internal == 1000
+
+    def test_divx_maximum(self):
+        """Test that divx cannot subdivide a bin narrower than a compartment."""
+        assert GridfinityBinDefinition(gridx=2, divx=13).divx == 13
+        with pytest.raises(ValidationError) as exc_info:
+            GridfinityBinDefinition(gridx=2, divx=14)
+        assert exc_info.value.errors()[0]["loc"] == ("divx",)
+
+    def test_divy_maximum(self):
+        """Test that divy cannot subdivide a bin narrower than a compartment."""
+        assert GridfinityBinDefinition(gridy=1, divy=6).divy == 6
+        with pytest.raises(ValidationError) as exc_info:
+            GridfinityBinDefinition(gridy=1, divy=7)
+        assert exc_info.value.errors()[0]["loc"] == ("divy",)
+
+    def test_divx_maximum_with_cut_cylinders(self):
+        """Test that cylindrical cutouts allow more divisions than compartments."""
+        assert GridfinityBinDefinition(gridx=2, divx=135, cut_cylinders=True).divx == 135
+        with pytest.raises(ValidationError):
+            GridfinityBinDefinition(gridx=2, divx=136, cut_cylinders=True)
+
+    def test_divisions_ignored_when_solid(self):
+        """Test that zero divisions produce a solid bin and skip the limits."""
+        body = GridfinityBinDefinition(gridx=1, divx=0, divy=0)
+        assert body.divx == 0
+
+    def test_compartment_height_minimum(self):
+        """Test that compartments require a minimum height above the base."""
+        assert GridfinityBinDefinition(gridz=1, bottom_thickness=3).bottom_thickness == 3
+        with pytest.raises(ValidationError) as exc_info:
+            GridfinityBinDefinition(gridz=1, bottom_thickness=3.5)
+        assert exc_info.value.errors()[0]["loc"] == ("bottom_thickness",)
+
+    def test_compartment_height_skipped_without_infill(self):
+        """Test that a full height base leaves no infill to subdivide."""
+        body = GridfinityBinDefinition(gridz=1, bottom_thickness=7)
+        assert body.bottom_thickness == 7
 
 
 class TestMakeGridfinityBinFilename:
@@ -170,8 +259,8 @@ class TestMakeGridfinityBinFilename:
 
     def test_enable_thumbscrew(self):
         """Test filename with thumbscrew enabled."""
-        body = GridfinityBinDefinition(enable_thumbscrew=True)
-        assert make_gridfinity_bin_filename(body) == "gridfinity-bin-2x1x3-original-enable_thumbscrew.stl"
+        body = GridfinityBinDefinition(enable_thumbscrew=True, bottom_thickness=7)
+        assert make_gridfinity_bin_filename(body) == "gridfinity-bin-2x1x3-original-enable_thumbscrew_bottom_thickness_7.0.stl"
 
     def test_custom_cd(self):
         """Test filename with custom cd."""
@@ -217,11 +306,6 @@ class TestMakeGridfinityBinFilename:
         """Test filename with printable_hole_top enabled."""
         body = GridfinityBinDefinition(printable_hole_top=True)
         assert make_gridfinity_bin_filename(body) == "gridfinity-bin-2x1x3-original-printable_hole_top.stl"
-
-    def test_custom_wall_thickness(self):
-        """Test filename with custom wall thickness."""
-        body = GridfinityBinDefinition(wall_thickness=2)
-        assert make_gridfinity_bin_filename(body) == "gridfinity-bin-2x1x3-original-wall_thickness_2.0.stl"
 
     def test_custom_bottom_thickness(self):
         """Test filename with custom bottom thickness."""

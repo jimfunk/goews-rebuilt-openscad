@@ -1,10 +1,12 @@
 """Test OpenAPI schema generation."""
 
+import asyncio
 import json
 import pytest
 from sanic import Sanic
 
 import server.server
+from server.openscad import OpenSCADError
 
 app = server.server.app
 
@@ -14,6 +16,16 @@ def sanic_app():
     """Return the Sanic app for testing."""
     app.config.TESTING = True
     return app
+
+
+def test_openscad_error_handler():
+    """Test that a failed build reports the OpenSCAD error to the client."""
+    response = asyncio.run(
+        server.server.openscad_error(None, OpenSCADError("ERROR: Assertion failed"))
+    )
+
+    assert response.status == 400
+    assert response.body == b"ERROR: Assertion failed"
 
 
 def test_openapi_schema(sanic_app):

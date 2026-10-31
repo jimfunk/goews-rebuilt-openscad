@@ -87,9 +87,6 @@ bin_printable_hole_top = false;
 // Enable "gridfinity-refined" thumbscrew hole
 bin_enable_thumbscrew = false;
 
-// Wall thickness in mm
-bin_wall_thickness = 1.2;
-
 // Bottom thickness in mm
 bin_bottom_thickness = 1.2;
 
@@ -123,7 +120,6 @@ module gridfinity_bin(
     chamfer_holes=false,
     printable_hole_top=false,
     enable_thumbscrew=false,
-    wall_thickness=1.2,
     bottom_thickness=1.2,
     hanger_tolerance=0.15,
     variant=variant_original
@@ -221,7 +217,6 @@ gridfinity_bin(
     gridx=bin_gridx,
     gridy=bin_gridy,
     gridz=bin_gridz,
-    wall_thickness=bin_wall_thickness,
     bottom_thickness=bin_bottom_thickness,
     magnet_holes=bin_magnet_holes,
     screw_holes=bin_screw_holes,

@@ -14,6 +14,14 @@ class OpenSCADError(Exception):
     pass
 
 
+def openscad_failure(stderr: bytes, action: str) -> OpenSCADError:
+    """Log the full OpenSCAD output and return an error carrying its first ERROR line."""
+    output = stderr.decode(errors="replace")
+    logger.error(f"OpenSCAD {action} failed: {output}")
+    detail = next((line for line in output.splitlines() if line.startswith("ERROR:")), None)
+    return OpenSCADError(detail or f"{action} failed")
+
+
 # Allow up to 32 processes at once
 process_semaphore = asyncio.Semaphore(32)
 
@@ -56,8 +64,7 @@ async def build(model_file: str, **params) -> bytes:
             raise OpenSCADError("Model generation failed")
 
     if proc.returncode != 0:
-        logger.error(f"OpenSCAD build failed: {stderr.decode()}")
-        raise OpenSCADError("Model generation failed")
+        raise openscad_failure(stderr, "Model generation")
 
     return stdout
 
@@ -105,7 +112,6 @@ async def render_screenshot(model_file: str, width: int = 800, height: int = 600
             raise OpenSCADError("Screenshot generation failed")
 
     if proc.returncode != 0:
-        logger.error(f"OpenSCAD build failed: {stderr.decode()}")
-        raise OpenSCADError("Screenshot generation failed")
+        raise openscad_failure(stderr, "Screenshot generation")
 
     return stdout
