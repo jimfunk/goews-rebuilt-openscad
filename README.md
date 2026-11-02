@@ -61,6 +61,14 @@ containing two STL files:
 * `tile-stack-*.stl` — the tile bodies and any PLA support geometry
 * `tile-stack-*-spacers.stl` — the PETG separator layers and pull tabs
 
+The ZIP is assembled from the cached STL artifacts on each download.
+It uses fixed member order, timestamps, permissions, and compression settings,
+so unchanged STL bytes produce identical ZIP bytes on the same compression runtime.
+The member timestamp is intentionally `1980-01-01`, not the generation time.
+This uses explicit [Python ZIP entry metadata](https://docs.python.org/3.13/library/zipfile.html#zipfile.ZipInfo)
+rather than `writestr()`'s default current-time metadata.
+Byte identity across different Python/zlib versions is not guaranteed.
+
 Import both STLs into the slicer together as one multi-part object, keeping their
 relative positions unchanged. Assign the tile body STL to PLA and the spacer STL to
 PETG.
