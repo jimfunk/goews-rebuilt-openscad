@@ -8,6 +8,7 @@ from server.parts import gridfinity_bin
 from server.parts import gridfinity_shelf
 from server.parts import hook
 from server.parts import mount
+from server.parts import pliers_hanger
 from server.parts import rack
 from server.parts import shelf
 from server.parts import shelf_bracket
@@ -22,6 +23,7 @@ __all__ = [
     "gridfinity_shelf",
     "hook",
     "mount",
+    "pliers_hanger",
     "rack",
     "shelf",
     "shelf_bracket",

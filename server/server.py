@@ -49,6 +49,7 @@ import server.parts.gridfinity_bin
 import server.parts.gridfinity_shelf
 import server.parts.hook
 import server.parts.mount
+import server.parts.pliers_hanger
 import server.parts.rack
 import server.parts.shelf
 import server.parts.tile
