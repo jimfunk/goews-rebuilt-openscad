@@ -61,13 +61,9 @@ containing two STL files:
 * `tile-stack-*.stl` — the tile bodies and any PLA support geometry
 * `tile-stack-*-spacers.stl` — the PETG separator layers and pull tabs
 
-The ZIP is assembled from the cached STL artifacts on each download.
-It uses fixed member order, timestamps, permissions, and compression settings,
-so unchanged STL bytes produce identical ZIP bytes on the same compression runtime.
-The member timestamp is intentionally `1980-01-01`, not the generation time.
-This uses explicit [Python ZIP entry metadata](https://docs.python.org/3.13/library/zipfile.html#zipfile.ZipInfo)
-rather than `writestr()`'s default current-time metadata.
-Byte identity across different Python/zlib versions is not guaranteed.
+Repeated downloads contain identical ZIP bytes when the STL files and server
+compression runtime are unchanged.
+The files inside the ZIP use a fixed date of January 1, 1980.
 
 Import both STLs into the slicer together as one multi-part object, keeping their
 relative positions unchanged. Assign the tile body STL to PLA and the spacer STL to
@@ -147,88 +143,35 @@ actually writable by the `goews` user.
 
 ### Generated model cache
 
-The API caches successful STL output on disk behind `server.openscad.build()`.
-Ordinary previews, downloads, and the two members of a tile-stack bundle
-share this cache.
-The Makefile's prebuilt `build/` catalog is separate and is not consulted.
-No HTTP endpoint, parameter default, or download filename changes are required.
+The part generator caches STL files on disk so previews and downloads can reuse
+models across server restarts.
+Tile-stack previews and ZIP downloads share the same cached models.
+The default cache holds up to 512 MiB and removes the least recently used files
+when space is needed.
 
 | Environment variable | Default | Purpose |
 | --- | --- | --- |
 | `GOEWS_CACHE_DIR` | `$XDG_CACHE_HOME/goews`, or `~/.cache/goews` | Parent of the private `artifacts-v1` cache directory. |
 | `GOEWS_CACHE_MAX_BYTES` | `536870912` (512 MiB) | Maximum retained STL bytes; `0` disables disk caching. |
-| `GOEWS_GENERATOR_REVISION` | Empty | Additional deployment revision to invalidate artifacts when other generation inputs change. |
+| `GOEWS_GENERATOR_REVISION` | Empty | Extra revision for generation inputs not detected automatically. |
 
-Use a local filesystem on Linux or macOS.
-All workers must use the same directory and budget to share artifacts safely.
-For production, provision a directory such as `/var/cache/goews`
-owned by the service user and set `GOEWS_CACHE_DIR` in the service environment.
-Keep it outside the checkout and outside OpenSCAD library directories;
-the service does not need write access to the source tree.
-The cache creates its private namespace with mode `0700`
-and refuses a namespace owned by another user, accessible by other users,
-or replaced by a symbolic link.
-Do not share it with untrusted writers or use a network filesystem.
-The deployment example is not changed or installed automatically.
+For production, use a local filesystem on Linux or macOS and provision a directory
+such as `/var/cache/goews`, owned by the service user.
+Set `GOEWS_CACHE_DIR` in the service environment and use the same directory and budget
+for all workers.
+Keep the cache outside the checkout and OpenSCAD library directories.
+The cache creates its private `artifacts-v1` directory with mode `0700`;
+it must not be a symbolic link or accessible by other users.
+Do not use a network filesystem or share the cache with untrusted writers.
 
-Keys hash the model identity, sorted effective OpenSCAD parameters,
-backend/export format, and a generation fingerprint.
-Omitted API defaults and explicit equivalent values share an artifact,
-including integer-valued floats;
-booleans and strings remain distinct from numbers.
-`None` values are omitted because they do not produce a `-D` argument.
-List order is preserved rather than assuming geometric equivalence.
-Download filenames are not cache keys.
+Changes to model sources, libraries, or the renderer invalidate cached models.
+Set `GOEWS_GENERATOR_REVISION` when changing other inputs, such as system fonts.
+Cache I/O failures fall back to rendering without caching.
 
-The fingerprint covers project SCAD sources and common imported asset formats,
-source trees in OpenSCAD's reported library search paths,
-the renderer executable and its reported build information,
-and `GOEWS_GENERATOR_REVISION`.
-Project scans exclude hidden directories, `build/`, `venv/`, `frontend/`,
-and `__pycache__/`.
-Library scans exclude hidden directories and follow library-directory symlinks.
-Each request rechecks the source trees;
-unchanged file hashes are memoized using file identity, size, and timestamps.
-Source additions, removals, and edits invalidate existing keys,
-and a render whose fingerprint changes while it runs is not stored.
-This deliberately invalidates the whole generation cache,
-rather than maintaining per-model dependency graphs.
-
-OpenSCAD search paths and build information come from `openscad --info`
-(see the [command-line manual](https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/Using_OpenSCAD_in_a_command_line_environment)),
-with discovery memoized by executable content and `OPENSCADPATH`.
-Restart workers when changing the renderer's surrounding runtime environment
-or a launcher script's target without changing the launcher itself.
-Use `GOEWS_GENERATOR_REVISION` for other inputs not covered by the scan,
-such as system fonts, custom assets outside those trees,
-or deployment-specific toolchain changes.
-If fingerprint discovery fails, generation continues without disk caching
-rather than risking an incorrectly identified artifact.
-
-Cache hits return the stored STL bytes unchanged.
-Concurrent identical requests share an in-flight task in each worker,
-and bounded POSIX lock files coordinate renders between workers.
-Completed STL results are not retained in a separate in-memory LRU.
-A disconnected client does not cancel a render shared by other callers.
-Writes use temporary files and atomic replacement;
-failed renders are not stored, and cache I/O failures fall back to generation.
-
-Least-recently-used artifacts are evicted on reads and writes to respect the budget,
-including artifacts from previous generation fingerprints.
-Oversized results are returned but not stored.
-The budget counts retained STL content, not filesystem overhead or in-flight
-response buffers; writes can temporarily require additional disk space.
-Interrupted-write temporary files are cleaned on the next cache operation.
-The zero-budget setting bypasses the cache without deleting old files.
-To clear it manually, stop all workers before removing its private namespace;
-never remove live lock files while workers are using them.
-
-The `openscad` and `openscad.cache` loggers report hits, misses, render duration,
-stored bytes, evictions, and cache failures at INFO/WARNING level.
-Enable INFO logging for these loggers when inspecting cache effectiveness.
-A cache hit guarantees byte identity;
-a fresh render after eviction or invalidation is not a promise of identical
-STL serialization across renderer or library versions.
+To clear the cache, stop all workers before removing the `artifacts-v1` directory.
+Setting the budget to zero disables caching without deleting existing files.
+See [cache implementation and diagnostics](server/README.md) for invalidation details,
+logging, and reproducibility limits.
 
 ## TODO
 
