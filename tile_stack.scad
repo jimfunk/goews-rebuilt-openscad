@@ -105,31 +105,22 @@ mounting_hole_countersink_depth = 2;
 
 /* [Separator Hole Relief] */
 
-// Clearance around the threaded GOEWS bolt hole in the PETG separator.
-// Increase this if the threaded hole still shows separator droop.
-separator_threaded_hole_clearance = -0.8;
+// By default the PETG separator follows the lower tile's top face exactly:
+// every opening in that face (hanger window, threaded hole, screw inset) is
+// cut out of the separator, so no PETG is left hanging over empty space.
+//
+// The values below let you deviate from that. A positive lip extends PETG
+// past the edge of an opening (unsupported from below); a positive clearance
+// pulls PETG back from the edge.
 
-// Maximum unsupported distance the next tile's first layer has to bridge
-// around the mounting shank hole. Larger values open more of the screw inset;
-// smaller values give the next tile more support.
-separator_mounting_hole_start_overhang = 0.8;
+// Extra clearance around the threaded GOEWS bolt hole.
+separator_threaded_hole_clearance = 0;
 
-// Keep this much PETG lip around the screw-head inset edge.
-// This prevents the separator from trying to bridge the whole inset.
-separator_mounting_inset_edge_lip = 0.8;
+// PETG lip extending into the screw-head inset of the mounting hole.
+separator_mounting_inset_edge_lip = 0;
 
-// Keep this much PETG lip around the central hanger/window cutout.
-// Larger values support the next tile more; smaller values open more of the window.
-separator_window_edge_lip = 2.5;
-
-// Rounded corner radius for the hanger/window relief cut.
-separator_window_corner_radius = 2.5;
-
-// Leave PETG under the circular pad around the GOEWS bolt hole.
-// Larger values remove more PETG around that circular pad; smaller values
-// leave more PETG separator material. This should stay smaller than the
-// circular pad radius.
-separator_window_threaded_pad_clearance = -0.5;
+// PETG lip extending into the central hanger/window opening.
+separator_window_edge_lip = 0;
 
 /* [Hidden] */
 
@@ -221,31 +212,16 @@ function tab_anchor_y() =
 function separator_threaded_hole_cut_radius() =
   (thread_diameter + thread_tolerance) / 2 + separator_threaded_hole_clearance;
 
+// Radius of the mounting hole where it meets the tile's top face.
+function mounting_hole_top_radius() =
+  mounting_hole_inset_depth > 0 || mounting_hole_countersink_depth > 0
+    ? mounting_hole_head_diameter / 2
+    : mounting_hole_shank_diameter / 2;
+
 function separator_mounting_hole_cut_radius() =
   max(
     mounting_hole_shank_diameter / 2,
-    min(
-      mounting_hole_shank_diameter / 2 + separator_mounting_hole_start_overhang,
-      mounting_hole_head_diameter / 2 - separator_mounting_inset_edge_lip
-    )
-  );
-
-function separator_window_cut_width() =
-  max(0.01, tile_hanger_width - 2 * separator_window_edge_lip);
-
-function separator_window_cut_height() =
-  max(0.01, tile_hanger_height - 2 * separator_window_edge_lip);
-
-function separator_window_cut_radius() =
-  min(
-    separator_window_corner_radius,
-    min(separator_window_cut_width(), separator_window_cut_height()) / 2 - 0.01
-  );
-
-function separator_window_threaded_pad_keep_radius() =
-  max(
-    separator_threaded_hole_cut_radius(),
-    tile_hanger_hole_outer_diameter - separator_window_threaded_pad_clearance
+    mounting_hole_top_radius() - separator_mounting_inset_edge_lip
   );
 
 module rounded_rect_2d(size=[10, 5], r=2) {
@@ -349,25 +325,36 @@ module separator_footprint_2d() {
   }
 }
 
-module separator_window_relief_2d() {
+// The hanger window as it appears on the tile's top face: the full hanger
+// rectangle, minus the tops of the two front cleats along its lower sides,
+// minus the circular pad around the GOEWS bolt hole. This mirrors the cuts
+// and cleats in hex_tile_single() in tile.scad.
+module tile_top_window_2d() {
   hanger_x_offset = (tile_width - tile_hanger_width) / 2;
+  cleat_w = tile_hanger_cleat_width;
+  cleat_h = tile_hanger_cleat_lower_height;
 
   difference() {
-    translate([
-      hanger_x_offset + tile_hanger_width / 2,
-      tile_triangle_height + tile_hanger_height / 2
-    ])
-      rounded_rect_2d(
-        [separator_window_cut_width(), separator_window_cut_height()],
-        separator_window_cut_radius()
-      );
+    translate([hanger_x_offset, tile_triangle_height])
+      polygon(points=[
+        [cleat_w, 0],
+        [tile_hanger_width - cleat_w, 0],
+        [tile_hanger_width - cleat_w, cleat_h],
+        [tile_hanger_width, cleat_h + cleat_w],
+        [tile_hanger_width, tile_hanger_height],
+        [0, tile_hanger_height],
+        [0, cleat_h + cleat_w],
+        [cleat_w, cleat_h]
+      ]);
 
-    // Keep separator material under the circular boss/pad around the GOEWS
-    // bolt hole. The actual threaded hole is still cut separately by
-    // hex_separator_hole_relief_2d().
     translate([tile_width / 2, tile_height - tile_threaded_hole_y_offset])
-      circle(r=separator_window_threaded_pad_keep_radius());
+      circle(r=tile_hanger_hole_outer_diameter);
   }
+}
+
+module separator_window_relief_2d() {
+  offset(delta=-separator_window_edge_lip)
+    tile_top_window_2d();
 }
 
 module hex_separator_hole_relief_2d() {
@@ -383,20 +370,14 @@ module hex_separator_hole_relief_2d() {
 
           if (!in_list([row + 1, column + 1], skiplist)) {
             translate([pos_x, pos_y]) {
-              // Open most of the central hanger/window area, leaving a small
-              // lip so the next tile's first layers have somewhere to start.
-              // The circular GOEWS-bolt pad is protected by
-              // separator_window_relief_2d(), then the actual threaded hole is
-              // cut separately below.
+              // Open the hanger window wherever the lower tile has no top face.
               separator_window_relief_2d();
 
               // Do not bridge the threaded GOEWS bolt hole.
               translate([tile_width / 2, tile_height - tile_threaded_hole_y_offset])
                 circle(r=separator_threaded_hole_cut_radius());
 
-              // Open most of the mounting screw inset, while leaving a small
-              // PETG ledge to support the next tile's first layer around the
-              // shank hole.
+              // Open the mounting screw inset.
               translate([tile_width / 2, tile_mounting_hole_y_offset])
                 circle(r=separator_mounting_hole_cut_radius());
             }
