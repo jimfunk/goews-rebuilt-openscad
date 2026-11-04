@@ -61,6 +61,10 @@ containing two STL files:
 * `tile-stack-*.stl` — the tile bodies and any PLA support geometry
 * `tile-stack-*-spacers.stl` — the PETG separator layers and pull tabs
 
+Repeated downloads contain identical ZIP bytes when the STL files and server
+compression runtime are unchanged.
+The files inside the ZIP use a fixed date of January 1, 1980.
+
 Import both STLs into the slicer together as one multi-part object, keeping their
 relative positions unchanged. Assign the tile body STL to PLA and the spacer STL to
 PETG.
@@ -136,6 +140,38 @@ There is Systemd unit definition in `systemd/goews.service`. It assumes the loca
 this repo is checked out at `/srv/goews-rebuilt-openscad` and a user `goews` exists.
 For security reasons, it is highly recommended that nothing under the checkout is
 actually writable by the `goews` user.
+
+### Generated model cache
+
+The part generator caches STL files on disk so previews and downloads can reuse
+models across server restarts.
+Tile-stack previews and ZIP downloads share the same cached models.
+The default cache holds up to 512 MiB and removes the least recently used files
+when space is needed.
+
+| Environment variable | Default | Purpose |
+| --- | --- | --- |
+| `GOEWS_CACHE_DIR` | `$XDG_CACHE_HOME/goews`, or `~/.cache/goews` | Parent of the private `artifacts-v1` cache directory. |
+| `GOEWS_CACHE_MAX_BYTES` | `536870912` (512 MiB) | Maximum retained STL bytes; `0` disables disk caching. |
+| `GOEWS_GENERATOR_REVISION` | Empty | Extra revision for generation inputs not detected automatically. |
+
+For production, use a local filesystem on Linux or macOS and provision a directory
+such as `/var/cache/goews`, owned by the service user.
+Set `GOEWS_CACHE_DIR` in the service environment and use the same directory and budget
+for all workers.
+Keep the cache outside the checkout and OpenSCAD library directories.
+The cache creates its private `artifacts-v1` directory with mode `0700`;
+it must not be a symbolic link or accessible by other users.
+Do not use a network filesystem or share the cache with untrusted writers.
+
+Changes to model sources, libraries, or the renderer invalidate cached models.
+Set `GOEWS_GENERATOR_REVISION` when changing other inputs, such as system fonts.
+Cache I/O failures fall back to rendering without caching.
+
+To clear the cache, stop all workers before removing the `artifacts-v1` directory.
+Setting the budget to zero disables caching without deleting existing files.
+See [cache implementation and diagnostics](server/README.md) for invalidation details,
+logging, and reproducibility limits.
 
 ## TODO
 

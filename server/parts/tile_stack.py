@@ -169,8 +169,16 @@ async def tile_stack_bundle(request: Request, body: TileStackDefinition):
 
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
-        zf.writestr(f"{basename}.stl", pla_stl)
-        zf.writestr(f"{basename}-spacers.stl", petg_stl)
+        for filename, stl in (
+            (f"{basename}.stl", pla_stl),
+            (f"{basename}-spacers.stl", petg_stl),
+        ):
+            # Avoid ZipFile's current-time metadata so identical STL artifacts
+            # produce identical downloads, independent of when they are bundled.
+            entry = zipfile.ZipInfo(filename, date_time=(1980, 1, 1, 0, 0, 0))
+            entry.create_system = 3  # Unix metadata on every server platform.
+            entry.external_attr = 0o100644 << 16
+            zf.writestr(entry, stl, compress_type=zipfile.ZIP_DEFLATED, compresslevel=6)
 
     return response.raw(
         buf.getvalue(),
